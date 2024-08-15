@@ -39,7 +39,7 @@ trait ValidatesOpenApiSpec
         if ($previous && $previous instanceof KeywordMismatch) {
             $messages[] = json_encode(is_string($content) ? json_decode($content) : $content, JSON_PRETTY_PRINT);
             $messages[] = $previous->getMessage();
-            $messages[] = 'Key: ' . implode(' -> ', $previous->dataBreadCrumb()->buildChain());
+            $messages[] = 'Key: '.implode(' -> ', $previous->dataBreadCrumb()->buildChain());
         }
         $messages[] = $exception->getMessage();
         PHPUnit::fail(implode(PHP_EOL, $messages));

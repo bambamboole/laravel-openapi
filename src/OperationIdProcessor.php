@@ -3,8 +3,9 @@
 namespace Bambamboole\LaravelOpenApi;
 
 use OpenApi\Analysis;
-use OpenApi\Generator;
 use OpenApi\Annotations as OA;
+use OpenApi\Generator;
+
 class OperationIdProcessor
 {
     public function __invoke(Analysis $analysis)
@@ -13,18 +14,18 @@ class OperationIdProcessor
 
         /** @var OA\Operation $operation */
         foreach ($allOperations as $operation) {
-            if (null === $operation->operationId) {
+            if ($operation->operationId === null) {
                 $operation->operationId = Generator::UNDEFINED;
             }
 
-            if (!Generator::isDefault($operation->operationId)) {
+            if (! Generator::isDefault($operation->operationId)) {
                 continue;
             }
 
             $operationPath = str_replace('/', '.', ltrim($operation->path, '/'));
 
-            $operation->operationId = strtoupper($operation->method) . '::' . $operationPath;
-//            $operation->operationId = $operation->path.','.strtolower($operation->method);
+            $operation->operationId = strtoupper($operation->method).'::'.$operationPath;
+            //            $operation->operationId = $operation->path.','.strtolower($operation->method);
         }
     }
 }

@@ -12,9 +12,7 @@ use OpenApi\Processors\OperationId;
 
 class OpenApiGeneratorFactory
 {
-    public function __construct(private readonly Repository $config)
-    {
-    }
+    public function __construct(private readonly Repository $config) {}
 
     public function create(): Generator
     {

@@ -10,6 +10,7 @@ use OpenApi\Util;
 class GenerateOpenApiSpecCommand extends Command
 {
     protected $signature = 'openapi:generate';
+
     public function handle(OpenApiGeneratorFactory $factory, Repository $config): int
     {
         $generator = $factory->create();
