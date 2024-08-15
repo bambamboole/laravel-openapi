@@ -10,4 +10,13 @@ class OpenApiServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/../config/openapi.php', 'openapi');
     }
+
+    public function register()
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                Commands\GenerateOpenApiSpecCommand::class,
+            ]);
+        }
+    }
 }
