@@ -14,7 +14,7 @@ class OpenApiGeneratorFactory
     public function create(array $config): Generator
     {
         $generator = new Generator(new ConsoleLogger);
-        $generator->getProcessorPipeline()->add(new AddMetaInfoProcessor($config));
+        $generator->getProcessorPipeline()->insert(new AddMetaInfoProcessor($config), fn () => 1);
         $generator->getProcessorPipeline()->remove(OperationId::class);
         $generator->getProcessorPipeline()->add(new OperationIdProcessor);
 

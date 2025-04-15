@@ -4,54 +4,43 @@ namespace Bambamboole\LaravelOpenApi\Attributes;
 
 use Bambamboole\LaravelOpenApi\AttributeFactory;
 use OpenApi\Annotations\Get;
-use OpenApi\Attributes\Items;
 use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\Response;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
-class ListEndpoint extends Get
+class ViewEndpoint extends Get
 {
     public function __construct(
         string $path,
         string $resource,
         ?string $description = null,
-        array $filters = [],
-        array $includes = [],
-        array $parameters = [],
         ?array $tags = null,
         ?array $security = null,
         ?string $summary = null,
+        ?array $parameters = [],
         ?string $operationId = null,
-        int $defaultPageSize = 15,
-        int $maxPageSize = 100,
+        array $includes = [],
     ) {
         $responses = [
-            new Response(response: '200', description: $description, content: new JsonContent(properties: [
-                new Property('data', type: 'array', items: new Items(ref: $resource)),
-                new Property('meta', properties: [
-                    new Property(property: 'current_page', type: 'integer'),
-                    new Property(property: 'from', type: 'integer'),
-                    new Property(property: 'path', type: 'string'),
-                    new Property(property: 'per_page', type: 'integer'),
-                    new Property(property: 'last_page', type: 'integer'),
-                    new Property(property: 'to', type: 'integer'),
-                    new Property(property: 'total', type: 'integer'),
-                    new Property(property: 'links', type: 'array', items: new Items(type: 'object')),
-                ], type: 'object'),
-            ])),
+            new Response(
+                response: '200',
+                description: $description,
+                content: new JsonContent(
+                    properties: [
+                        new Property('data', ref: $resource),
+                    ]
+                )
+            ),
             new Response(response: '401', description: 'Unauthorized'),
             new Response(response: '403', description: 'Unauthorized'),
         ];
-        $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
-        $parameters = array_merge($parameters, AttributeFactory::createPaginationParameters($defaultPageSize, $maxPageSize));
-        if (! empty($filters)) {
-            $parameters[] = AttributeFactory::createFilterParameter($filters);
-        }
         if (! empty($includes)) {
             $parameters[] = AttributeFactory::createIncludeParameter($includes);
         }
+
+        $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
 
         parent::__construct([
             'path' => $path,
