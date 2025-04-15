@@ -25,7 +25,6 @@ class OperationIdProcessor
             $operationPath = str_replace('/', '.', ltrim($operation->path, '/'));
 
             $operation->operationId = strtoupper($operation->method).'::'.$operationPath;
-            //            $operation->operationId = $operation->path.','.strtolower($operation->method);
         }
     }
 }

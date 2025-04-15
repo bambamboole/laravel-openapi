@@ -13,9 +13,11 @@ trait ValidatesOpenApiSpec
 {
     use ValidatesOpenApiSpecBase;
 
+    protected string $apiToLoad = 'default';
+
     protected function getOpenApiSpecPath(): string
     {
-        return config('openapi.output');
+        return config(sprintf('openapi.apis.%s.output', $this->apiToLoad));
     }
 
     protected function getSpecFileType(): string
