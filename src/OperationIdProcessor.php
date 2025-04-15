@@ -2,6 +2,7 @@
 
 namespace Bambamboole\LaravelOpenApi;
 
+use Illuminate\Support\Str;
 use OpenApi\Analysis;
 use OpenApi\Annotations as OA;
 use OpenApi\Generator;
@@ -22,9 +23,11 @@ class OperationIdProcessor
                 continue;
             }
 
-            $operationPath = str_replace('/', '.', ltrim($operation->path, '/'));
-
-            $operation->operationId = strtoupper($operation->method).'::'.$operationPath;
+            $operation->operationId = Str::of($operation->path)
+                ->replace('/', '-')
+                ->slug(dictionary: ['{' => '-', '}' => '-'])
+                ->prepend(strtoupper($operation->method).'::')
+                ->toString();
         }
     }
 }
