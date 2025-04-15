@@ -11,7 +11,7 @@ use OpenApi\Attributes\Response;
 use OpenApi\Attributes\Schema;
 use OpenApi\Generator;
 
-#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class ListEndpoint extends Get
 {
     public function __construct(
@@ -22,6 +22,7 @@ class ListEndpoint extends Get
         ?array $tags = null,
         ?array $security = null,
         ?string $summary = null,
+        ?string $operationId = null,
         int $defaultPageSize = 15,
         int $maxPageSize = 100,
     ) {
