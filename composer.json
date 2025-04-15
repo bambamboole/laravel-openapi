@@ -19,7 +19,7 @@
         "illuminate/console": "^8.0|^9.0|^10.0|^11.0|^12.0",
         "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0",
         "kirschbaum-development/laravel-openapi-validator": "^1.0",
-        "zircote/swagger-php": "^4.10"
+        "zircote/swagger-php": "^5.0"
     },
     "require-dev": {
         "laravel/pint": "^1.8",
