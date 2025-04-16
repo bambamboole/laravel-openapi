@@ -3,7 +3,7 @@
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
 use Bambamboole\LaravelOpenApi\AttributeFactory;
-use OpenApi\Annotations\Patch;
+use OpenApi\Annotations\Put;
 use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\RequestBody;
@@ -11,7 +11,7 @@ use OpenApi\Attributes\Response;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
-class UpdateEndpoint extends Patch
+class PutEndpoint extends Put
 {
     public function __construct(
         string $path,

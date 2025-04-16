@@ -10,7 +10,7 @@ use OpenApi\Attributes\Response;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
-class ViewEndpoint extends Get
+class GetEndpoint extends Get
 {
     public function __construct(
         string $path,

@@ -3,7 +3,7 @@
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
 use Bambamboole\LaravelOpenApi\AttributeFactory;
-use OpenApi\Annotations\Post;
+use OpenApi\Annotations\Patch;
 use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\RequestBody;
@@ -11,7 +11,7 @@ use OpenApi\Attributes\Response;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
-class CreateEndpoint extends Post
+class PatchEndpoint extends Patch
 {
     public function __construct(
         string $path,
@@ -26,7 +26,7 @@ class CreateEndpoint extends Post
     ) {
         $responses = [
             new Response(
-                response: '201',
+                response: '200',
                 description: $description,
                 content: new JsonContent(
                     properties: [
