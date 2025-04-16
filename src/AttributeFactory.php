@@ -3,8 +3,13 @@
 namespace Bambamboole\LaravelOpenApi;
 
 use OpenApi\Attributes\Items;
+use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Parameter;
+use OpenApi\Attributes\Property;
+use OpenApi\Attributes\Response;
 use OpenApi\Attributes\Schema;
+use ReflectionClass;
+use ReflectionMethod;
 
 class AttributeFactory
 {
@@ -76,5 +81,54 @@ class AttributeFactory
                 schema: new Schema(type: 'integer', example: $defaultPageSize),
             ),
         ];
+    }
+
+    public static function createValidationResponse(string $request): Response
+    {
+        $rules = array_keys(self::extractValidationRules($request));
+        $rules = empty($rules) ? ['email', 'street'] : $rules;
+        $firstKey = $rules[0] ?? 'email';
+
+        return new Response(
+            response: '422',
+            description: 'Failed validation',
+            content: new JsonContent(
+                properties: [
+                    new Property('message', type: 'string',
+                        example: 'The '.$firstKey.' is required',
+                    ),
+                    new Property('errors', type: 'object',
+                        example: [
+                            $rules[0] => sprintf('The %s field is required', $rules[0]),
+                            $rules[1] => sprintf('The %s field is required', $rules[1]),
+                        ]
+                    ),
+                ],
+            )
+        );
+    }
+
+    private static function extractValidationRules(string $requestClass): array
+    {
+        try {
+            if (! class_exists($requestClass)) {
+                return [];
+            }
+
+            $reflection = new ReflectionClass($requestClass);
+
+            if (! $reflection->hasMethod('rules')) {
+                return [];
+            }
+
+            $rulesMethod = new ReflectionMethod($requestClass, 'rules');
+            $rules = $rulesMethod->invoke($reflection->newInstanceWithoutConstructor());
+
+            // Get the first two rules
+            return array_slice($rules, 0, 2, true);
+        } catch (\Throwable) {
+            // Silently fail and return empty array
+            return [];
+        }
     }
 }

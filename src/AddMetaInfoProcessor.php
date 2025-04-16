@@ -3,9 +3,14 @@
 namespace Bambamboole\LaravelOpenApi;
 
 use OpenApi\Analysis;
-use OpenApi\Annotations as OA;
+use OpenApi\Attributes\Components;
+use OpenApi\Attributes\Contact;
+use OpenApi\Attributes\Info;
+use OpenApi\Attributes\OpenApi;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\Schema;
+use OpenApi\Attributes\SecurityScheme;
+use OpenApi\Attributes\Server;
 
 class AddMetaInfoProcessor
 {
@@ -13,31 +18,42 @@ class AddMetaInfoProcessor
 
     public function __invoke(Analysis $analysis)
     {
-        $analysis->openapi->info = new OA\Info([
-            'title' => $this->config['name'],
-            'version' => $this->config['version'] ?? '1.0.0',
-            'description' => $this->config['description'] ?? '',
-            'contact' => $this->config['contact'] ?? '',
-        ]);
-        $schemas = is_array($analysis->openapi->components->schemas)
-            ? $analysis->openapi->components->schemas
-            : [];
-
-        $analysis->openapi->components->schemas = array_merge(
-            $schemas,
-            [
-                new Schema(
-                    schema: 'Money',
-                    properties: [
-                        new Property(property: 'amount', type: 'string'),
-                        new Property(property: 'currency', type: 'string'),
-                    ],
-                    type: 'object',
-                    additionalProperties: false,
+        $analysis->openapi = new OpenApi(
+            info: new Info(
+                version: $this->config['version'] ?? '1.0.0',
+                description: $this->config['description'] ?? '',
+                title: $this->config['name'],
+                contact: new Contact(
+                    name: $this->config['contact']['name'],
+                    url: $this->config['contact']['url'],
+                    email: $this->config['contact']['email'],
                 ),
-            ]
+            ),
+            servers: array_map(
+                fn ($server) => new Server($server['url'], $server['description']),
+                $this->config['servers'],
+            ),
+            security: [['BearerAuth' => []]],
+            components: new Components(
+                schemas: [
+                    new Schema(
+                        schema: 'Money',
+                        properties: [
+                            new Property(property: 'amount', oneOf: [new Schema(type: 'string'), new Schema(type: 'number')]),
+                            new Property(property: 'currency', type: 'string'),
+                        ],
+                        type: 'object',
+                        additionalProperties: false,
+                    ),
+                ],
+                securitySchemes: [
+                    new SecurityScheme(
+                        securityScheme: 'BearerAuth',
+                        type: 'http',
+                        scheme: 'bearer',
+                    ),
+                ]
+            )
         );
-
-        $analysis->openapi->servers = array_map(fn ($server) => new OA\Server($server), $this->config['servers']);
     }
 }
