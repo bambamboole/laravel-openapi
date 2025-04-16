@@ -83,11 +83,43 @@ class AttributeFactory
         ];
     }
 
-    public static function createValidationResponse(string $request): Response
+    public static function createValidationResponse(string|array $request): Response
     {
-        $rules = array_keys(self::extractValidationRules($request));
-        $rules = empty($rules) ? ['email', 'street'] : $rules;
-        $firstKey = $rules[0] ?? 'email';
+        if (is_string($request)) {
+            $validationData = self::extractValidationInfo($request);
+            $keys = $validationData['keys'];
+            $rules = $validationData['rules'];
+
+            // Generate realistic error messages
+            $errorMessages = [];
+            foreach ($keys as $key) {
+                $rule = $rules[$key] ?? 'required';
+                $errorMessages[$key] = [self::generateLaravelLikeValidationMessage($key, $rule)];
+            }
+        } elseif (is_array($request)) {
+            $errorMessages = [];
+
+            // Check if array is associative (field => message)
+            if (array_keys($request) !== range(0, count($request) - 1)) {
+                // Associative array - use keys as field names and values as custom messages
+                foreach ($request as $field => $message) {
+                    $errorMessages[$field] = [is_array($message) ? $message[0] : $message];
+                }
+            } else {
+                // Indexed array - use values as field names and generate messages
+                foreach ($request as $field) {
+                    $errorMessages[$field] = [self::generateLaravelLikeValidationMessage($field, 'required')];
+                }
+            }
+        }
+
+        // Fallback if no messages could be generated
+        if (empty($errorMessages)) {
+            $errorMessages = [
+                'email' => ['The email field is required.'],
+                'street' => ['The street field is required.'],
+            ];
+        }
 
         return new Response(
             response: '422',
@@ -95,40 +127,108 @@ class AttributeFactory
             content: new JsonContent(
                 properties: [
                     new Property('message', type: 'string',
-                        example: 'The '.$firstKey.' is required',
+                        example: reset($errorMessages)[0] ?? 'The validation failed.',
                     ),
                     new Property('errors', type: 'object',
-                        example: [
-                            $rules[0] => sprintf('The %s field is required', $rules[0]),
-                            $rules[1] => sprintf('The %s field is required', $rules[1]),
-                        ]
+                        example: $errorMessages,
                     ),
                 ],
             )
         );
     }
 
-    private static function extractValidationRules(string $requestClass): array
+    private static function generateLaravelLikeValidationMessage(string $field, string|array $rule): string
+    {
+        // Convert array rules to string for parsing
+        if (is_array($rule)) {
+            $rule = implode('|', array_map(function ($item) {
+                return is_array($item) ? implode(':', $item) : $item;
+            }, $rule));
+        }
+
+        // Parse the rules
+        $rulesList = explode('|', $rule);
+        $formattedField = str_replace('_', ' ', $field);
+
+        // Generate Laravel-like messages for common rules
+        if (in_array('required', $rulesList)) {
+            return "The {$formattedField} field is required.";
+        }
+
+        foreach ($rulesList as $singleRule) {
+            if ($singleRule === 'email') {
+                return "The {$formattedField} must be a valid email address.";
+            }
+
+            if (str_starts_with($singleRule, 'min:')) {
+                $min = substr($singleRule, 4);
+
+                return "The {$formattedField} must be at least {$min} characters.";
+            }
+
+            if (str_starts_with($singleRule, 'max:')) {
+                $max = substr($singleRule, 4);
+
+                return "The {$formattedField} may not be greater than {$max} characters.";
+            }
+
+            if ($singleRule === 'numeric') {
+                return "The {$formattedField} must be a number.";
+            }
+
+            if ($singleRule === 'integer') {
+                return "The {$formattedField} must be an integer.";
+            }
+
+            if ($singleRule === 'date') {
+                return "The {$formattedField} is not a valid date.";
+            }
+
+            if ($singleRule === 'boolean') {
+                return "The {$formattedField} field must be true or false.";
+            }
+
+            if (str_starts_with($singleRule, 'in:')) {
+                $values = substr($singleRule, 3);
+
+                return "The selected {$formattedField} is invalid.";
+            }
+
+            if (str_starts_with($singleRule, 'regex:')) {
+                return "The {$formattedField} format is invalid.";
+            }
+        }
+
+        // Default message
+        return "The {$formattedField} is invalid.";
+    }
+
+    private static function extractValidationInfo(string $requestClass): array
     {
         try {
             if (! class_exists($requestClass)) {
-                return [];
+                return ['keys' => [], 'rules' => []];
             }
 
             $reflection = new ReflectionClass($requestClass);
 
             if (! $reflection->hasMethod('rules')) {
-                return [];
+                return ['keys' => [], 'rules' => []];
             }
 
             $rulesMethod = new ReflectionMethod($requestClass, 'rules');
             $rules = $rulesMethod->invoke($reflection->newInstanceWithoutConstructor());
 
             // Get the first two rules
-            return array_slice($rules, 0, 2, true);
+            $slicedRules = array_slice($rules, 0, 2, true);
+
+            return [
+                'keys' => array_keys($slicedRules),
+                'rules' => $slicedRules,
+            ];
         } catch (\Throwable) {
             // Silently fail and return empty array
-            return [];
+            return ['keys' => [], 'rules' => []];
         }
     }
 }
