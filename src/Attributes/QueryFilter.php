@@ -16,7 +16,7 @@ class QueryFilter extends Parameter
 {
     public function __construct(
         ?string $type = null,
-//        ?array $items = null,
+        //        ?array $items = null,
         ?string $parameter = null,
         ?string $name = null,
         ?string $description = null,
@@ -36,20 +36,20 @@ class QueryFilter extends Parameter
         FilterType $filterType = FilterType::EXACT,
         array $operators = ['>=', '<=', '>', '<', '='],
     ) {
-        if ($type === 'operator'){
+        if ($type === 'operator') {
             $schema = new Schema(type: 'string', example: '>=5');
-            $description = $name . ' Filter. available operators: ' . implode(', ', $operators);
-        }else{
-            $schema = match ($multiple){
-                true => new Schema(type: 'array',items: new Items(type: $type, example: $example)),
+            $description = $name.' Filter. available operators: '.implode(', ', $operators);
+        } else {
+            $schema = match ($multiple) {
+                true => new Schema(type: 'array', items: new Items(type: $type, example: $example)),
                 default => new Schema(type: $type, example: $example),
             };
-            $description = $description ?? $name . ' Filter';
+            $description = $description ?? $name.' Filter';
         }
 
         parent::__construct([
             'parameter' => $parameter ?? Generator::UNDEFINED,
-            'name' => 'filter[' . $name . ']',
+            'name' => 'filter['.$name.']',
             'description' => $description,
             'in' => 'query',
             'required' => false,

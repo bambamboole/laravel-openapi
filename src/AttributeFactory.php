@@ -2,6 +2,7 @@
 
 namespace Bambamboole\LaravelOpenApi;
 
+use Bambamboole\LaravelOpenApi\Enum\PaginationType;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Parameter;
@@ -63,16 +64,9 @@ class AttributeFactory
         return $missing;
     }
 
-    public static function createPaginationParameters(int $defaultPageSize, int $maxPageSize): array
+    public static function createPaginationParameters(int $defaultPageSize, int $maxPageSize, PaginationType $type): array
     {
-        return [
-            new Parameter(
-                name: 'page',
-                description: 'Page number.',
-                in: 'query',
-                required: false,
-                schema: new Schema(type: 'integer', example: 1),
-            ),
+        $params = [
             new Parameter(
                 name: 'per_page',
                 description: sprintf('Number of items per page. Default: %d, Max: %d', $defaultPageSize, $maxPageSize),
@@ -81,6 +75,26 @@ class AttributeFactory
                 schema: new Schema(type: 'integer', example: $defaultPageSize),
             ),
         ];
+        if ($type === PaginationType::CURSOR) {
+            $params[] = new Parameter(
+                name: 'cursor',
+                description: 'The cursor to use for the paginated call.',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'string', example: 'eyJpZCI6MTUsIl9wb2ludHNUb05leHRJdGVtcyI6dHJ1ZX0'),
+            );
+        }
+        if ($type === PaginationType::SIMPLE || $type === PaginationType::TABLE) {
+            $params[] = new Parameter(
+                name: 'page',
+                description: 'Page number.',
+                in: 'query',
+                required: false,
+                schema: new Schema(type: 'integer', example: 1),
+            );
+        }
+
+        return $params;
     }
 
     public static function createValidationResponse(string|array $request): Response
