@@ -1,6 +1,10 @@
 <?php declare(strict_types=1);
 
 return [
+    'docs' => [
+        'enabled' => env('APP_ENV') !== 'production',
+        'prefix' => 'api-docs',
+    ],
     'apis' => [
         'default' => [
             'oas_version' => '3.1.0',
