@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\Yaml\Yaml;
 
-if (config('openapi.docs.enabled') === false){
+if (config('openapi.docs.enabled') === false) {
     return;
 }
 Route::middleware(['web', 'auth'])->group(function () {
