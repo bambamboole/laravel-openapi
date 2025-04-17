@@ -69,6 +69,87 @@ composer require bambamboole/laravel-openapi
     }
 ```
 
+Here another example with a paginated endpoint:
+
+```php
+    #[ListEndpoint(
+        path: '/api/v1/sales-orders',
+        resource: SalesOrderResource::class,
+        description: 'Paginated list of sales orders',
+        includes: ['customer', 'positions'],
+        parameters: [
+            new QueryFilter(name: 'id', type: 'integer', example: 1),
+            new QueryFilter(name: 'customer.id',  type: 'integer', example: 1),
+            new QueryFilter(name: 'positions.sku',  type: 'string', example: 'tshirt-yellow-xl'),
+            new QueryFilter(name: 'positions.count',  type: 'operator'),
+            new QuerySort(['created_at', 'updated_at']),
+        ],
+        tags: ['SalesOrder'],
+    )]
+    public function index(): AnonymousResourceCollection
+    {
+        $salesOrders = QueryBuilder::for(SalesOrder::class)
+            ->withCount('positions')
+            ->defaultSort('-created_at')
+            ->allowedFilters([
+                AllowedFilter::exact('id'),
+                AllowedFilter::belongsTo('customer.id', 'customer'),
+                AllowedFilter::exact('positions.sku'),
+                new AllowedFilter('positions.count', new RelationCountFilter(),'positions'),
+                AllowedFilter::operator('created_at', FilterOperator::DYNAMIC)
+            ])
+            ->allowedSorts([
+                AllowedSort::field('created_at'),
+                AllowedSort::field('updated_at'),
+            ])
+            ->allowedIncludes([
+                'customer',
+                'positions',
+            ])
+            ->paginate(3);
+
+        return SalesOrderResource::collection($salesOrders);
+    }
+```
+
+An example for a Form Request:
+```php
+#[OA\Schema(
+    schema: 'SalesOrder',
+    required: ['id', 'status', 'customer', 'created_at', 'updated_at'],
+    properties: [
+        new OA\Property(property: 'id', type: 'integer'),
+        new OA\Property(property: 'status', ref: SalesOrderStatus::class),
+        new OA\Property(property: 'customer', anyOf: [
+            new OA\Schema(ref: CustomerResource::class),
+            new OA\Schema(properties: [new OA\Property(property: 'id', type: 'integer')], type: 'object'),
+        ]
+        ),
+        new OA\Property(property: 'positions', type: 'array', items: new OA\Items(ref: SalesOrderPositionResource::class)),
+        new OA\Property(property: 'created_at', type: 'datetime'),
+        new OA\Property(property: 'updated_at', type: 'datetime'),
+    ],
+    type: 'object',
+    additionalProperties: false,
+)]
+class SalesOrderResource extends JsonResource
+{
+    /** @var SalesOrder */
+    public $resource;
+
+    public function toArray($request): array
+    {
+        return [
+            'id' => $this->resource->id,
+            'status' => $this->resource->status,
+            'customer' => $this->whenLoaded('customer', fn () => new CustomerResource($this->resource->customer), ['id' => $this->resource->customer_id]),
+            'positions' => $this->whenLoaded('positions', fn () => SalesOrderPositionResource::collection($this->resource->positions)),
+            'created_at' => $this->resource->created_at->format(DATE_ATOM),
+            'updated_at' => $this->resource->updated_at->format(DATE_ATOM),
+        ];
+    }
+}
+```
 
 ```bash
 php artisan openapi:generate
