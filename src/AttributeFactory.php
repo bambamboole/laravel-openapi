@@ -155,6 +155,7 @@ class AttributeFactory
     {
         // Convert array rules to string for parsing
         if (is_array($rule)) {
+            $rule = array_filter($rule, fn($v) => is_string($v));
             $rule = implode('|', array_map(function ($item) {
                 return is_array($item) ? implode(':', $item) : $item;
             }, $rule));
