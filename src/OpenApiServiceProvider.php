@@ -18,6 +18,7 @@ class OpenApiServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Commands\GenerateOpenApiSpecCommand::class,
+                Commands\MergeOpenApiSchemasCommand::class,
             ]);
         }
     }

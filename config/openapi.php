@@ -5,7 +5,7 @@ return [
         'enabled' => env('APP_ENV') !== 'production',
         'prefix' => 'api-docs',
     ],
-    'apis' => [
+    'schemas' => [
         'default' => [
             'oas_version' => '3.1.0',
             'ruleset' => null,
@@ -26,5 +26,8 @@ return [
                 ],
             ],
         ],
+    ],
+    'merge' => [
+        'schemas' => ['default'],
     ],
 ];

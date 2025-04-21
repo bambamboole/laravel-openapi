@@ -10,22 +10,22 @@ use OpenApi\Util;
 
 class GenerateOpenApiSpecCommand extends Command
 {
-    protected $signature = 'openapi:generate {api?}';
+    protected $signature = 'openapi:generate {schema?}';
 
     public function handle(OpenApiGeneratorFactory $factory, Repository $config): int
     {
-        $apis = $config->get('openapi.apis');
-        if ($api = $this->argument('api')) {
-            $specified = $config->get('openapi.apis.'.$api);
+        $schemas = $config->get('openapi.schemas');
+        if ($schema = $this->argument('schema')) {
+            $specified = $config->get('openapi.schemas.'.$schema);
             if (! $specified) {
-                $this->error('API not found: '.$api);
+                $this->error('Schema not found: '.$schema);
 
                 return self::FAILURE;
             }
-            $apis = [$api => $specified];
+            $schemas = [$schema => $specified];
         }
 
-        foreach ($apis as $config) {
+        foreach ($schemas as $config) {
 
             $generator = $factory->create($config);
             $openApi = $generator->generate(Util::finder($config['folders']));
