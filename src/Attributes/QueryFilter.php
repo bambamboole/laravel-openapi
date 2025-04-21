@@ -16,14 +16,13 @@ class QueryFilter extends Parameter
 {
     public function __construct(
         ?string $type = null,
-        //        ?array $items = null,
         ?string $parameter = null,
         ?string $name = null,
         ?string $description = null,
         ?bool $deprecated = null,
         ?bool $allowEmptyValue = null,
         string|object|null $ref = null,
-        mixed $example = Generator::UNDEFINED,
+        mixed $example = '>=3',
         ?array $examples = null,
         array|JsonContent|XmlContent|Attachable|null $content = null,
         ?bool $allowReserved = null,
@@ -36,15 +35,19 @@ class QueryFilter extends Parameter
         FilterType $filterType = FilterType::EXACT,
         array $operators = ['>=', '<=', '>', '<', '='],
     ) {
+        if (in_array($name, ['created_at', 'updated_at', 'deleted_at'])) {
+            $example = '>=2025-03-01';
+        }
         if ($type === 'operator') {
-            $schema = new Schema(type: 'string', example: '>=5');
+            $schema = new Schema(type: 'string', example: $example);
             $description = $name.' Filter. available operators: '.implode(', ', $operators);
         } else {
             $schema = match ($multiple) {
                 true => new Schema(type: 'array', items: new Items(type: $type, example: $example)),
                 default => new Schema(type: $type, example: $example),
             };
-            $description = $description ?? $name.' Filter';
+            $name = $filterType === FilterType::EXACT ? $name : $name.'.'.$filterType->value;
+            $description = $description ?? $name .' Filter';
         }
 
         parent::__construct([
