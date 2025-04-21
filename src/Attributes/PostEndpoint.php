@@ -16,19 +16,18 @@ use OpenApi\Generator;
 class PostEndpoint extends Post
 {
     public function __construct(
-        string  $path,
-        string  $request,
-        string  $resource,
+        string $path,
+        string $request,
+        string $resource,
         ?string $description = null,
-        ?array  $tags = null,
-        ?array  $security = null,
+        ?array $tags = null,
+        ?array $security = null,
         ?string $summary = null,
-        ?array  $parameters = [],
+        ?array $parameters = [],
         ?string $operationId = null,
-        string  $successStatus = '200',
-        string  $contentType = 'application/json',
-    )
-    {
+        string $successStatus = '200',
+        string $contentType = 'application/json',
+    ) {
         $responses = [
             new Response(
                 response: $successStatus,
