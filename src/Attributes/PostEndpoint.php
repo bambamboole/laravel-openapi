@@ -5,26 +5,30 @@ namespace Bambamboole\LaravelOpenApi\Attributes;
 use Bambamboole\LaravelOpenApi\AttributeFactory;
 use OpenApi\Annotations\Post;
 use OpenApi\Attributes\JsonContent;
+use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\RequestBody;
 use OpenApi\Attributes\Response;
+use OpenApi\Attributes\Schema;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class PostEndpoint extends Post
 {
     public function __construct(
-        string $path,
-        string $request,
-        string $resource,
+        string  $path,
+        string  $request,
+        string  $resource,
         ?string $description = null,
-        ?array $tags = null,
-        ?array $security = null,
+        ?array  $tags = null,
+        ?array  $security = null,
         ?string $summary = null,
-        ?array $parameters = [],
+        ?array  $parameters = [],
         ?string $operationId = null,
-        string $successStatus = '200',
-    ) {
+        string  $successStatus = '200',
+        string  $contentType = 'application/json',
+    )
+    {
         $responses = [
             new Response(
                 response: $successStatus,
@@ -43,7 +47,7 @@ class PostEndpoint extends Post
         $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
 
         $requestBody = new RequestBody(
-            content: new JsonContent(ref: $request),
+            content: new MediaType($contentType, schema: new Schema(ref: $request))
         );
         parent::__construct([
             'path' => $path ?? Generator::UNDEFINED,
