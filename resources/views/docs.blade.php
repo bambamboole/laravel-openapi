@@ -16,7 +16,7 @@
         // Build a system
         const ui = SwaggerUIBundle({
             dom_id: '#swagger-ui',
-            spec:  @json($spec),
+            url:  '{{$url}}',
 
             requestInterceptor: function (request) {
                 request.headers['X-CSRF-TOKEN'] = '{{ csrf_token() }}';
@@ -32,7 +32,7 @@
                 SwaggerUIBundle.plugins.DownloadUrl
             ],
 
-            layout: "StandaloneLayout",
+            // layout: "StandaloneLayout",
             deepLinking: true,
         })
 

@@ -43,15 +43,23 @@ Route::middleware(['web', 'auth'])->group(function () {
             ->setExpires(new \DateTime('+1 year'));
     })->name('openapi.docs');
 
-    Route::get('/api-docs/{api?}', function (?string $api = null) {
-        $api = $api ?: 'default';
-        $path = config('openapi.apis.'.$api.'.output');
+    Route::get('/api-docs/schemas/{schema}', function (string $schema) {
+        $path = config('openapi.apis.'.$schema.'.output');
 
-        $spec = str_ends_with($path, '.json')
+        if (! $path) {
+            abort(404, 'Schema not found');
+        }
+
+        return str_ends_with($path, '.json')
             ? json_decode(File::get($path), true)
             : Yaml::parse(File::get($path));
 
-        return view('openapi::docs', ['title' => 'OpenAPI Docs: '.$api, 'api' => $api, 'spec' => $spec]);
+    })->name('openapi.schema');
+
+    Route::get('/api-docs/{schema?}', function (?string $schema = null) {
+        $schema = $schema ?: 'default';
+
+        return view('openapi::docs', ['title' => 'OpenAPI Docs: '.$schema, 'api' => $schema, 'url' => route('openapi.schema', ['schema' => $schema])]);
     })->name('openapi.docs');
 
 });
