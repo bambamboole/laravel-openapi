@@ -44,7 +44,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     })->name('openapi.docs');
 
     Route::get('/api-docs/schemas/{schema}', function (string $schema) {
-        $path = config('openapi.apis.'.$schema.'.output');
+        $path = config('openapi.schemas.'.$schema.'.output');
 
         if (! $path) {
             abort(404, 'Schema not found');
