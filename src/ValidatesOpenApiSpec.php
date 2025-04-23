@@ -17,7 +17,7 @@ trait ValidatesOpenApiSpec
 
     protected function getOpenApiSpecPath(): string
     {
-        return config(sprintf('openapi.apis.%s.output', $this->apiToLoad));
+        return config(sprintf('openapi.schemas.%s.output', $this->apiToLoad));
     }
 
     protected function getSpecFileType(): string
