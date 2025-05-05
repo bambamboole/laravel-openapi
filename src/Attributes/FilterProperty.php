@@ -10,17 +10,15 @@ use OpenApi\Attributes\Property;
 class FilterProperty
 {
     public function __construct(
-        public string            $name,
-        public string            $description = '',
-        public bool              $multiple = true,
-        public ?string           $type = null,
-        public ?string           $example = null,
-        public FilterType        $filterType = FilterType::EXACT,
-        public array             $operators = ['>=', '<=', '>', '<', '='],
+        public string $name,
+        public string $description = '',
+        public bool $multiple = true,
+        public ?string $type = null,
+        public ?string $example = null,
+        public FilterType $filterType = FilterType::EXACT,
+        public array $operators = ['>=', '<=', '>', '<', '='],
         public array|string|null $enum = null,
-    )
-    {
-    }
+    ) {}
 
     public function toProperty(): Property
     {
