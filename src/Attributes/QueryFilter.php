@@ -34,17 +34,18 @@ class QueryFilter extends Parameter
         bool $multiple = true,
         FilterType $filterType = FilterType::EXACT,
         array $operators = ['>=', '<=', '>', '<', '='],
+        array|string|null $enum = null,
     ) {
         if (in_array($name, ['created_at', 'updated_at', 'deleted_at'])) {
             $example = '>=2025-03-01';
         }
         if ($type === 'operator') {
-            $schema = new Schema(type: 'string', example: $example);
+            $schema = new Schema(type: 'string', example: $example, enum: $enum);
             $description = $name.' Filter. available operators: '.implode(', ', $operators);
         } else {
             $schema = match ($multiple) {
-                true => new Schema(type: 'array', items: new Items(type: $type, example: $example)),
-                default => new Schema(type: $type, example: $example),
+                true => new Schema(type: 'array', items: new Items(type: $type, example: $example, enum: $enum)),
+                default => new Schema(type: $type, example: $example, enum: $enum),
             };
             $name = $filterType === FilterType::EXACT ? $name : $name.'.'.$filterType->value;
             $description = $description ?? $name.' Filter';
