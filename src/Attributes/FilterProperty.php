@@ -3,15 +3,17 @@
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
 use Bambamboole\LaravelOpenApi\Enum\FilterType;
+use Illuminate\Support\Arr;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\Property;
+use OpenApi\Generator;
 
 #[\Attribute]
 class FilterProperty
 {
     public function __construct(
         public string $name,
-        public string $description = '',
+        public ?string $description = null,
         public bool $multiple = true,
         public ?string $type = null,
         public ?string $example = null,
@@ -25,17 +27,31 @@ class FilterProperty
         return match ($this->multiple) {
             true => new Property(
                 property: $this->name,
-                description: $this->description,
+                description: $this->description(),
                 type: 'array',
-                items: new Items(type: $this->type, example: $this->example(), enum: $this->enum)
+                items: new Items(type: $this->type, enum: $this->enum, example: $this->example())
             ),
             false => new Property(
                 property: $this->name,
-                description: $this->description,
+                description: $this->description(),
                 enum: $this->enum,
                 example: $this->example(),
             ),
         };
+    }
+
+    private function description(): ?string
+    {
+        if ($this->description) {
+            return $this->description;
+        }
+        $description = 'Filter for '.$this->name.' property of the given resource.';
+        if ($this->filterType === FilterType::OPERATOR) {
+            $description .= 'The filter is applied using the operators: '.Arr::join($this->operators, ', ', ' and ');
+        }
+        // @TODO extend description for partial filters
+
+        return $description;
     }
 
     private function example()
@@ -46,8 +62,7 @@ class FilterProperty
 
         return match ($this->type) {
             'integer' => 12,
-            'string' => 'foobar',
-            default => null
+            default => Generator::UNDEFINED
         };
     }
 }

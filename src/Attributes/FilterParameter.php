@@ -41,7 +41,7 @@ class FilterParameter extends Parameter
             'allowEmptyValue' => $allowEmptyValue ?? Generator::UNDEFINED,
             'ref' => $ref ?? Generator::UNDEFINED,
             'example' => Generator::UNDEFINED,
-            'style' => 'form',
+            'style' => 'deepObject',
             'explode' => Generator::UNDEFINED,
             'allowReserved' => $allowReserved ?? Generator::UNDEFINED,
             'spaceDelimited' => $spaceDelimited ?? Generator::UNDEFINED,
