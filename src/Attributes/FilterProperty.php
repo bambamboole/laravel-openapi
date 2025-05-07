@@ -20,6 +20,8 @@ class FilterProperty
         public FilterType $filterType = FilterType::EXACT,
         public array $operators = ['>=', '<=', '>', '<', '='],
         public array|string|null $enum = null,
+        public ?string $default = null,
+        public bool $partial = false,
     ) {}
 
     public function toProperty(): Property
@@ -47,9 +49,14 @@ class FilterProperty
         }
         $description = 'Filter for '.$this->name.' property of the given resource.';
         if ($this->filterType === FilterType::OPERATOR) {
-            $description .= 'The filter is applied using the operators: '.Arr::join($this->operators, ', ', ' and ');
+            $description .= 'The filter is applied using the operators: '.Arr::join($this->operators, ', ', ' and ').'.';
         }
-        // @TODO extend description for partial filters
+        if ($this->default) {
+            $description .= ' Default value for this filter is "'.$this->default.'".';
+        }
+        if ($this->partial) {
+            $description .= ' Use "~" to match also partially.';
+        }
 
         return $description;
     }
