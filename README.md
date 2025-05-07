@@ -78,10 +78,12 @@ Here another example with a paginated endpoint:
         description: 'Paginated list of sales orders',
         includes: ['customer', 'positions'],
         parameters: [
-            new QueryFilter(name: 'id', type: 'integer', example: 1),
-            new QueryFilter(name: 'customer.id',  type: 'integer', example: 1),
-            new QueryFilter(name: 'positions.sku',  type: 'string', example: 'tshirt-yellow-xl'),
-            new QueryFilter(name: 'positions.count',  type: 'operator'),
+            new FilterParameter([
+                new FilterProperty(name: 'id', type: 'integer'),
+                new FilterProperty(name: 'documentNumber', type: 'string', example: 'I-12343'),
+                new FilterProperty(name: 'documentDate', type: 'date'),
+                new FilterProperty(name: 'status', enum: InvoiceStatus::class),
+            ]),
             new QuerySort(['created_at', 'updated_at']),
         ],
         tags: ['SalesOrder'],
@@ -93,8 +95,9 @@ Here another example with a paginated endpoint:
             ->defaultSort('-created_at')
             ->allowedFilters([
                 AllowedFilter::exact('id'),
-                AllowedFilter::belongsTo('customer.id', 'customer'),
-                AllowedFilter::exact('positions.sku'),
+                AllowedFilter::exact('documentNumber'),
+                AllowedFilter::exact('documentDate', 'datum'),
+                AllowedFilter::exact('status'),
                 new AllowedFilter('positions.count', new RelationCountFilter(),'positions'),
                 AllowedFilter::operator('created_at', FilterOperator::DYNAMIC)
             ])
@@ -113,6 +116,7 @@ Here another example with a paginated endpoint:
 ```
 
 An example for a Form Request:
+
 ```php
 #[OA\Schema(
     schema: 'SalesOrder',
@@ -154,6 +158,11 @@ class SalesOrderResource extends JsonResource
 ```bash
 php artisan openapi:generate
 ```
+
+### Reusing filters
+
+It can be very useful to reuse filters across multiple endpoints. This can be done by creating a new Attribute class
+that implements the `FilterPropertyCollection` interface
 
 ### Testing
 

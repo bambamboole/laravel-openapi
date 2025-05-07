@@ -26,8 +26,16 @@ class FilterParameter extends Parameter
         ?array $x = null,
         ?array $attachables = null,
     ) {
+        $flattenedFilterProps = [];
+        foreach ($filters as $filter) {
+            if ($filter instanceof FilterPropertyCollection) {
+                $flattenedFilterProps = array_merge($flattenedFilterProps, $filter->getFilterProperties());
+            } else {
+                $flattenedFilterProps[] = $filter;
+            }
+        }
         $schema = new Schema(
-            properties: array_map(fn (FilterProperty $fp) => $fp->toProperty(), $filters),
+            properties: array_map(fn (FilterProperty $fp) => $fp->toProperty(), $flattenedFilterProps),
             type: 'object',
         );
 
