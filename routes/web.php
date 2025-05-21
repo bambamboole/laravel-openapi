@@ -41,7 +41,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         ))->setSharedMaxAge(31536000)
             ->setMaxAge(31536000)
             ->setExpires(new \DateTime('+1 year'));
-    })->name('openapi.docs');
+    })->name('openapi.docs.assets');
 
     Route::get('/api-docs/schemas/{schema}', function (string $schema) {
         $path = config('openapi.schemas.'.$schema.'.output');
