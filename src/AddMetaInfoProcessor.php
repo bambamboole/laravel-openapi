@@ -36,7 +36,7 @@ class AddMetaInfoProcessor
             security: [['BearerAuth' => []]],
             components: new Components(
                 schemas: [
-                    new Schema(
+                    $this->config['exclude_money'] ? null : new Schema(
                         schema: 'Money',
                         properties: [
                             new Property(property: 'amount', oneOf: [new Schema(type: 'string'), new Schema(type: 'number')]),

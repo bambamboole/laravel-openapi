@@ -24,7 +24,7 @@ class FilterProperty
         public bool $partial = false,
     ) {}
 
-    public function toProperty(): Property
+    public function toProperty(): array|Property
     {
         return match ($this->multiple) {
             true => new Property(

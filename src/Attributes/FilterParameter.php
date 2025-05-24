@@ -2,6 +2,7 @@
 
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
+use Illuminate\Support\Arr;
 use OpenApi\Annotations\Parameter;
 use OpenApi\Attributes\Attachable;
 use OpenApi\Attributes\JsonContent;
@@ -20,22 +21,17 @@ class FilterParameter extends Parameter
         ?array $examples = null,
         array|JsonContent|XmlContent|Attachable|null $content = null,
         ?bool $allowReserved = null,
-        ?array $spaceDelimited = null,
-        ?array $pipeDelimited = null,
         // annotation
         ?array $x = null,
         ?array $attachables = null,
     ) {
-        $flattenedFilterProps = [];
-        foreach ($filters as $filter) {
-            if ($filter instanceof FilterPropertyCollection) {
-                $flattenedFilterProps = array_merge($flattenedFilterProps, $filter->getFilterProperties());
-            } else {
-                $flattenedFilterProps[] = $filter;
-            }
-        }
+        $filters = collect($filters)
+            ->flatMap(fn (mixed $f) => $f instanceof FilterPropertyCollection ? $f->getFilterProperties() : Arr::wrap($f))
+            ->flatMap(fn (FilterProperty $f) => Arr::wrap($f->toProperty()))
+            ->all();
+
         $schema = new Schema(
-            properties: array_map(fn (FilterProperty $fp) => $fp->toProperty(), $flattenedFilterProps),
+            properties: $filters,
             type: 'object',
         );
 
@@ -52,8 +48,8 @@ class FilterParameter extends Parameter
             'style' => 'deepObject',
             'explode' => Generator::UNDEFINED,
             'allowReserved' => $allowReserved ?? Generator::UNDEFINED,
-            'spaceDelimited' => $spaceDelimited ?? Generator::UNDEFINED,
-            'pipeDelimited' => $pipeDelimited ?? Generator::UNDEFINED,
+            'spaceDelimited' => Generator::UNDEFINED,
+            'pipeDelimited' => Generator::UNDEFINED,
             'x' => $x ?? Generator::UNDEFINED,
             'value' => $this->combine($schema, $examples, $content, $attachables),
         ]);
