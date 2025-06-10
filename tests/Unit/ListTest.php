@@ -15,6 +15,7 @@ class ListTest extends TestCase
         $generator = $factory->create($config);
 
         $actualYaml = $generator->generate(Util::finder($config['folders']))->toYaml();
+        //        file_put_contents(__DIR__.'/../Fixtures/List/list-actual.yml', $actualYaml);
         $expectedYaml = file_get_contents(__DIR__.'/../Fixtures/List/list-expected.yml');
 
         self::assertSame($expectedYaml, $actualYaml);

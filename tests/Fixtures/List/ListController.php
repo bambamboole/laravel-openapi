@@ -2,9 +2,11 @@
 
 namespace Bambamboole\LaravelOpenApi\Tests\Fixtures\List;
 
+use Bambamboole\LaravelOpenApi\Attributes\DateFilter;
 use Bambamboole\LaravelOpenApi\Attributes\FilterParameter;
-use Bambamboole\LaravelOpenApi\Attributes\FilterProperty;
+use Bambamboole\LaravelOpenApi\Attributes\IdFilter;
 use Bambamboole\LaravelOpenApi\Attributes\ListEndpoint;
+use Bambamboole\LaravelOpenApi\Attributes\StringFilter;
 
 class ListController
 {
@@ -12,16 +14,17 @@ class ListController
         path: '/api/list',
         resource: ListResource::class,
         description: 'List resources',
-        maxPageSize: 1337,
         includes: ['foo', 'bar'],
         parameters: [
             new FilterParameter([
-                new FilterProperty(name: 'id', type: 'integer'),
-                new FilterProperty(name: 'status', enum: StatusEnum::class),
-                new FilterProperty(name: 'name', type: 'string', example: 'something'),
+                new IdFilter,
+                new StringFilter(name: 'status'),
+                new StringFilter(name: 'name'),
+                new DateFilter(name: 'created_at'),
                 new FilterCollection,
             ]),
         ],
+        maxPageSize: 1337,
     )]
     public function index(): ListResource
     {

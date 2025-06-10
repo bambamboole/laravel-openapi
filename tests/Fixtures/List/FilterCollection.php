@@ -11,7 +11,7 @@ class FilterCollection implements FilterPropertyCollection
     {
         return [
             new FilterProperty(name: 'from_collection_1', type: 'integer'),
-            new FilterProperty(name: 'from_collection_2', type: 'string', example: 'Test'),
+            new FilterProperty(name: 'from_collection_2', type: 'string'),
         ];
     }
 }

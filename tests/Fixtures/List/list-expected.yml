@@ -24,37 +24,21 @@ paths:
           required: false
           style: deepObject
           schema:
-            properties:
-              id:
-                description: 'Filter for id property of the given resource.'
-                type: array
-                items:
-                  type: integer
-                  example: 12
-              status:
-                description: 'Filter for status property of the given resource.'
-                type: array
-                items:
-                  enum: [active, inactive, pending]
-              name:
-                description: 'Filter for name property of the given resource.'
-                type: array
-                items:
+            type: array
+            items:
+              properties:
+                key:
                   type: string
-                  example: something
-              from_collection_1:
-                description: 'Filter for from_collection_1 property of the given resource.'
-                type: array
-                items:
-                  type: integer
-                  example: 12
-              from_collection_2:
-                description: 'Filter for from_collection_2 property of the given resource.'
-                type: array
-                items:
+                  enum: [id, status, name, created_at, from_collection_1, from_collection_2]
+                op:
+                  description: operator
                   type: string
-                  example: Test
-            type: object
+                  enum: [equals, notEquals, in, notIn, contains, notContains, startsWith, endsWith, lessThan, lessThanOrEquals, greaterThan, greaterThanOrEquals]
+                value:
+                  description: 'value oder so'
+                  oneOf: [{ title: String, type: string }, { title: Array, type: array, items: { type: string } }]
+              type: object
+              additionalProperties: false
         -
           name: include
           in: query

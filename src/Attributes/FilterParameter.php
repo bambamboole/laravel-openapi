@@ -5,7 +5,9 @@ namespace Bambamboole\LaravelOpenApi\Attributes;
 use Illuminate\Support\Arr;
 use OpenApi\Annotations\Parameter;
 use OpenApi\Attributes\Attachable;
+use OpenApi\Attributes\Items;
 use OpenApi\Attributes\JsonContent;
+use OpenApi\Attributes\Property;
 use OpenApi\Attributes\Schema;
 use OpenApi\Attributes\XmlContent;
 use OpenApi\Generator;
@@ -24,15 +26,62 @@ class FilterParameter extends Parameter
         // annotation
         ?array $x = null,
         ?array $attachables = null,
+        bool $withCustom = false,
     ) {
         $filters = collect($filters)
             ->flatMap(fn (mixed $f) => $f instanceof FilterPropertyCollection ? $f->getFilterProperties() : Arr::wrap($f))
-            ->flatMap(fn (FilterProperty $f) => Arr::wrap($f->toProperty()))
-            ->all();
+            ->flatten(1);
+
+        $key = $withCustom
+            ? new Property(
+                property: 'key',
+                oneOf: [
+                    new Schema(
+                        title: 'String',
+                        enum: $filters->pluck('name')->unique()->all(),
+                    ),
+                    new Schema(
+                        title: 'custom',
+                        type: 'string',
+                    ),
+                ]
+            )
+            : new Property(
+                property: 'key',
+                type: 'string',
+                enum: $filters->pluck('name')->unique()->all(),
+            );
 
         $schema = new Schema(
-            properties: $filters,
-            type: 'object',
+            type: 'array',
+            items: new Items(
+                properties: [
+                    $key,
+                    new Property(
+                        property: 'op',
+                        description: 'operator',
+                        type: 'string',
+                        enum: $filters->pluck('operators')->flatten()->unique()->all(),
+                    ),
+                    new Property(
+                        property: 'value',
+                        description: 'value oder so',
+                        oneOf: [
+                            new Schema(
+                                title: 'String',
+                                type: 'string',
+                            ),
+                            new Schema(
+                                title: 'Array',
+                                type: 'array',
+                                items: new Items(type: 'string'),
+                            ),
+                        ]
+                    ),
+                ],
+                type: 'object',
+                additionalProperties: false,
+            ),
         );
 
         parent::__construct([

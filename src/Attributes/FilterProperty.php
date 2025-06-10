@@ -18,7 +18,7 @@ class FilterProperty
         public ?string $type = null,
         public ?string $example = null,
         public FilterType $filterType = FilterType::EXACT,
-        public array $operators = ['>=', '<=', '>', '<', '='],
+        public array $operators = [],
         public array|string|null $enum = null,
         public ?string $default = null,
         public bool $partial = false,
