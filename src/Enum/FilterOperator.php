@@ -16,4 +16,6 @@ enum FilterOperator: string
     case GREATER_THAN_OR_EQUALS = 'greaterThanOrEquals';
     case LESS_THAN = 'lessThan';
     case LESS_THAN_OR_EQUALS = 'lessThanOrEquals';
+    case IS_NULL = 'isNull';
+    case IS_NOT_NULL = 'isNotNull';
 }
