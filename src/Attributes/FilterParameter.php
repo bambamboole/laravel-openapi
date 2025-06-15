@@ -52,6 +52,14 @@ class FilterParameter extends Parameter
                 enum: $filters->pluck('name')->unique()->all(),
             );
 
+        $filterAvailableOperatorDescription = $filters->map(function (FilterProperty $filter) {
+            return sprintf(
+                '`%s`: %s',
+                $filter->name,
+                collect($filter->operators)->map(fn ($op) => '*'.$op->value.'*')->implode(', ')
+            );
+        })->implode(" \n\n");
+
         $schema = new Schema(
             type: 'array',
             items: new Items(
@@ -87,7 +95,7 @@ class FilterParameter extends Parameter
         parent::__construct([
             'parameter' => Generator::UNDEFINED,
             'name' => 'filter',
-            'description' => 'The filter parameter is used to filter the results of the given endpoint',
+            'description' => "The filter parameter is used to filter the results of the given endpoint. \n\n\n**Supported filter operators by key:** \n\n".$filterAvailableOperatorDescription,
             'in' => 'query',
             'required' => false,
             'deprecated' => $deprecated ?? Generator::UNDEFINED,
