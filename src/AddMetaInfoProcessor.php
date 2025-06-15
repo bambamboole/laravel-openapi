@@ -30,7 +30,7 @@ class AddMetaInfoProcessor
                 ),
             ),
             servers: array_map(
-                fn ($server) => new Server($server['url'], $server['description']),
+                fn ($server) => new Server(...$server),
                 $this->config['servers'],
             ),
             security: [['BearerAuth' => []]],
