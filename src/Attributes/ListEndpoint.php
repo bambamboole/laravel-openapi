@@ -70,11 +70,11 @@ class ListEndpoint extends Get
                     'meta',
                     properties: [
                         new Property(property: 'current_page', type: 'integer'),
-                        new Property(property: 'from', type: 'integer'),
+                        new Property(property: 'from', type: 'integer', nullable: true),
                         new Property(property: 'path', type: 'string'),
                         new Property(property: 'per_page', type: 'integer'),
                         new Property(property: 'last_page', type: 'integer'),
-                        new Property(property: 'to', type: 'integer'),
+                        new Property(property: 'to', type: 'integer', nullable: true),
                         new Property(property: 'total', type: 'integer'),
                         new Property(property: 'links', type: 'array', items: new Items(type: 'object')),
                     ],
@@ -123,7 +123,7 @@ class ListEndpoint extends Get
                     'meta',
                     properties: [
                         new Property(property: 'current_page', type: 'integer'),
-                        new Property(property: 'from', type: 'integer'),
+                        new Property(property: 'from', type: 'integer', nullable: true),
                         new Property(property: 'last_page', type: 'integer'),
                         new Property(property: 'links', type: 'array', items: new Items(type: 'object', properties: [
                             new Property(property: 'url', type: 'string', nullable: true),
@@ -132,7 +132,7 @@ class ListEndpoint extends Get
                         ])),
                         new Property(property: 'path', type: 'string'),
                         new Property(property: 'per_page', type: 'integer'),
-                        new Property(property: 'to', type: 'integer'),
+                        new Property(property: 'to', type: 'integer', nullable: true),
                         new Property(property: 'total', type: 'integer'),
                     ],
                     type: 'object',

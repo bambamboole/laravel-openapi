@@ -75,7 +75,7 @@ paths:
               schema:
                 properties:
                   data: { type: array, items: { $ref: '#/components/schemas/ListResource' } }
-                  meta: { properties: { current_page: { type: integer }, from: { type: integer }, path: { type: string }, per_page: { type: integer }, last_page: { type: integer }, to: { type: integer }, total: { type: integer }, links: { type: array, items: { type: object } } }, type: object }
+                  meta: { properties: { current_page: { type: integer }, from: { type: [integer, 'null'] }, path: { type: string }, per_page: { type: integer }, last_page: { type: integer }, to: { type: [integer, 'null'] }, total: { type: integer }, links: { type: array, items: { type: object } } }, type: object }
                 type: object
         '401':
           description: Unauthorized
