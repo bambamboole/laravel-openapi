@@ -8,7 +8,11 @@ use Symfony\Component\Yaml\Yaml;
 if (config('openapi.docs.enabled') === false) {
     return;
 }
-Route::middleware(['web', 'auth'])->group(function () {
+
+Route::middleware(array_merge(
+    ['web', 'auth'],
+    config('openapi.docs.middlewares', [])
+))->group(function () {
 
     Route::get('/api-docs/assets/{asset}', function (string $asset) {
         $allowedFiles = [
