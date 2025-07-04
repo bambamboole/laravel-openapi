@@ -1,0 +1,91 @@
+openapi: 3.1.0
+info:
+  title: 'My API'
+  description: 'Developer API'
+  contact:
+    name: 'API Support'
+    url: 'https://.example.com'
+    email: api@example.com
+  version: 1.0.0
+servers:
+  -
+    url: 'https://.example.com'
+    description: 'Your API environment'
+paths:
+  '/api/put/{id}':
+    put:
+      description: 'put resource'
+      operationId: 'PUT::api-put-id'
+      parameters:
+        -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutRequest'
+      responses:
+        '200':
+          description: 'put resource'
+          content:
+            application/json:
+              schema:
+                properties:
+                  data: { $ref: '#/components/schemas/PutResource' }
+                type: object
+        '422':
+          description: 'Failed validation'
+          content:
+            application/json:
+              schema:
+                properties:
+                  message: { type: string, example: 'The email field is required.' }
+                  errors: { type: object, example: { email: ['The email field is required.'], street: ['The street field is required.'] } }
+                type: object
+        '401':
+          description: Unauthorized
+        '403':
+          description: Unauthorized
+components:
+  schemas:
+    PutRequest:
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        description:
+          type:
+            - string
+            - 'null'
+      type: object
+      additionalProperties: false
+    PutResource:
+      required:
+        - id
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+        created_at:
+          type: date-time
+        updated_at:
+          type: date-time
+      type: object
+      additionalProperties: false
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+security:
+  -
+    BearerAuth: []
