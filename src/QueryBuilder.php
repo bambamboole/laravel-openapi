@@ -18,6 +18,7 @@ class QueryBuilder extends \Spatie\QueryBuilder\QueryBuilder
             ? QueryBuilderRequest::fromRequest($request)
             : app(QueryBuilderRequest::class);
     }
+
     public function apiPaginate(): Paginator
     {
         return $this->simplePaginate(min(100, $this->request->integer('per_page', 15)));
