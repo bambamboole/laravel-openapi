@@ -2,6 +2,7 @@
 
 namespace Bambamboole\LaravelOpenApi\Http;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\File;
 use Symfony\Component\Yaml\Yaml;
@@ -46,17 +47,22 @@ class ApiDocsController
         return $response;
     }
 
-    public function schema(string $schema)
+    public function schema(string $schema): JsonResponse
     {
         $path = config('openapi.schemas.'.$schema.'.output');
 
         if (! $path) {
             abort(404, 'Schema not found');
         }
-
-        return str_ends_with($path, '.json')
+        $spec = str_ends_with($path, '.json')
             ? json_decode(File::get($path), true)
             : Yaml::parse(File::get($path));
+
+        if (is_array($spec) && isset($spec['servers'])) {
+            $spec['servers'][0]['url'] = config('app.url');
+        }
+
+        return new JsonResponse($spec);
     }
 
     public function docs(?string $schema = null)
