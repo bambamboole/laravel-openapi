@@ -23,4 +23,9 @@ class QueryBuilder extends \Spatie\QueryBuilder\QueryBuilder
     {
         return $this->simplePaginate(min(100, $this->request->integer('per_page', 15)));
     }
+
+    public function getRequest(): QueryBuilderRequest
+    {
+        return $this->request;
+    }
 }
