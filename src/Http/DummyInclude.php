@@ -11,8 +11,8 @@ class DummyInclude implements IncludeInterface
 {
     public function __invoke(Builder $query, string $include): void {}
 
-    public static function make(string $name, ?string $internalName = null): Collection
+    public static function make(string $name): Collection
     {
-        return AllowedInclude::custom($name, new static, $internalName);
+        return AllowedInclude::custom($name, new static);
     }
 }
