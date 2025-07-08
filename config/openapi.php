@@ -11,6 +11,7 @@ return [
             'ruleset' => null,
             'folders' => [base_path('app')],
             'output' => base_path('openapi.yml'),
+            'validation_status_code' => 422,
             'name' => 'My API',
             'version' => '1.0.0',
             'description' => 'Developer API',
