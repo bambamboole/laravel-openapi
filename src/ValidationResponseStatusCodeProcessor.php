@@ -11,6 +11,7 @@ class ValidationResponseStatusCodeProcessor
 
     public function __invoke(Analysis $analysis): void
     {
+        /** @var OA\Operation[] $allOperations */
         $allOperations = $analysis->getAnnotationsOfType(OA\Operation::class);
 
         foreach ($allOperations as $operation) {

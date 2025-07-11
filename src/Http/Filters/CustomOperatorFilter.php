@@ -31,7 +31,7 @@ class CustomOperatorFilter extends FiltersExact
         if (is_array($value['value']) && ! in_array($operator, [FilterOperator::IN, FilterOperator::NOT_IN])) {
             throw ValidationException::withMessages([$property => "Unsupported filter operator: {$operator->value}. Only in and notIn are allowed for multiple values"]);
         }
-        $value = $this->getInternalValue(Arr::wrap($value['value']));
+        $value = $this->getInternalValue(Arr::wrap($value['value']), $property);
 
         $query->where(function (Builder $query) use ($value, $operator, $property) {
             // Handle different operators
@@ -89,10 +89,10 @@ class CustomOperatorFilter extends FiltersExact
 
     }
 
-    protected function getInternalValue(string|bool|array $value): string|bool|array
+    protected function getInternalValue(string|bool|array $value, string $property): string|bool|array
     {
         if (is_array($value)) {
-            return array_map(fn ($v) => $this->getInternalValue($v), $value);
+            return array_map(fn ($v) => $this->getInternalValue($v, $property), $value);
         }
         if (! $this->enum
             || ! enum_exists($this->enum)
@@ -110,8 +110,8 @@ class CustomOperatorFilter extends FiltersExact
             }
         }
         if (! $mappedValue) {
-            // @TODO here we have status hard coded. But this needs to be dynamic based on the external used property
-            throw ValidationException::withMessages(['status' => 'Invalid status: '.$value.'. Valid values are: '.implode(', ', array_map(fn ($v) => $v->value, $this->enum::cases()))]);
+            throw ValidationException::withMessages([
+                $property => 'Invalid value: '.$value.'. Valid values are: '.implode(', ', array_map(fn (\BackedEnum $v) => $v->value, $this->enum::cases()))]);
         }
 
         return $mappedValue;
