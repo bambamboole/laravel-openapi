@@ -22,6 +22,7 @@ class GetEndpoint extends Get
         ?array $parameters = [],
         ?string $operationId = null,
         array $includes = [],
+        ?array $x = null,
     ) {
         $responses = [
             new Response(
@@ -48,10 +49,10 @@ class GetEndpoint extends Get
             'description' => $description ?? Generator::UNDEFINED,
             'summary' => $summary ?? Generator::UNDEFINED,
             'security' => $security ?? Generator::UNDEFINED,
-            'servers' => $servers ?? Generator::UNDEFINED,
+            'servers' => Generator::UNDEFINED,
             'tags' => $tags ?? Generator::UNDEFINED,
-            'callbacks' => $callbacks ?? Generator::UNDEFINED,
-            'deprecated' => $deprecated ?? Generator::UNDEFINED,
+            'callbacks' => Generator::UNDEFINED,
+            'deprecated' => Generator::UNDEFINED,
             'x' => $x ?? Generator::UNDEFINED,
             'value' => $this->combine($responses, $parameters),
         ]);

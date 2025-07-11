@@ -48,7 +48,7 @@ class AttributeFactory
         $missing = [];
         foreach ($matches[1] as $match) {
             $hasParam = count(
-                array_filter($parameters ?? [], fn (Parameter $parameter) => $parameter->name === $match)
+                array_filter($parameters, fn (Parameter $parameter) => $parameter->name === $match)
             ) > 0;
             if ($hasParam) {
                 continue;
