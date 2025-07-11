@@ -1,5 +1,9 @@
-vendor
-.phpunit.result.cache
+build
 composer.lock
-coverage.xml
-.idea
+vendor
+.php_cs.cache
+coverage
+.phpunit.cache
+.phpunit.result.cache
+/.idea
+.php-cs-fixer.cache

@@ -27,8 +27,11 @@
         "zircote/swagger-php": "^5.0"
     },
     "require-dev": {
+        "larastan/larastan": "^3.5",
         "laravel/pint": "^1.8",
-        "phpunit/phpunit": "^10.1"
+        "orchestra/testbench": "^9.14",
+        "pestphp/pest": "^3.7",
+        "phpunit/phpunit": "^11.5"
     },
     "autoload": {
         "psr-4": {
@@ -37,16 +40,35 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Bambamboole\\LaravelOpenApi\\Tests\\": "tests"
+            "Bambamboole\\LaravelOpenApi\\Tests\\": "tests",
+            "Bambamboole\\LaravelOpenApi\\Database\\Factories\\": "database/factories"
         }
     },
     "scripts": {
         "lint": "vendor/bin/pint",
-        "test": "vendor/bin/phpunit",
-        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+        "test": "vendor/bin/pest",
+        "test:coverage": "vendor/bin/pest --coverage-html coverage",
+        "test:ci": "vendor/bin/pest --coverage-clover coverage.xml",
+        "phpstan:analyse": "vendor/bin/phpstan analyse --ansi --memory-limit=4G",
+        "phpstan:baseline": "vendor/bin/phpstan analyse --generate-baseline --memory-limit=4G",
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ]
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "extra": {
         "laravel": {
