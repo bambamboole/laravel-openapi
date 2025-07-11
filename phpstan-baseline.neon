@@ -1,0 +1,7 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Method Bambamboole\\LaravelOpenApi\\QueryBuilder\:\:getRequest\(\) should return Bambamboole\\LaravelOpenApi\\QueryBuilderRequest but returns Spatie\\QueryBuilder\\QueryBuilderRequest\.$#'
+			identifier: return.type
+			count: 1
+			path: src/QueryBuilder.php
