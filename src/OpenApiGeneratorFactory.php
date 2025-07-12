@@ -18,6 +18,7 @@ class OpenApiGeneratorFactory
         $generator->getProcessorPipeline()->remove(OperationId::class);
         $generator->getProcessorPipeline()->add(new OperationIdProcessor);
         $generator->getProcessorPipeline()->add(new ValidationResponseStatusCodeProcessor($config['validation_status_code'] ?? 422));
+        $generator->getProcessorPipeline()->add(new SortComponentsProcessor);
 
         $analyzer = new ReflectionAnalyser([new DocBlockAnnotationFactory, new AttributeAnnotationFactory]);
 

@@ -203,6 +203,17 @@ paths:
           description: Unauthorized
 components:
   schemas:
+    CreateTestModelRequest:
+      properties:
+        name:
+          type: string
+        status:
+          enum:
+            - active
+            - inactive
+            - pending
+      type: object
+      additionalProperties: false
     TestResource:
       required:
         - id
@@ -225,17 +236,6 @@ components:
         updated_at:
           type: string
           format: date-time
-      type: object
-      additionalProperties: false
-    CreateTestModelRequest:
-      properties:
-        name:
-          type: string
-        status:
-          enum:
-            - active
-            - inactive
-            - pending
       type: object
       additionalProperties: false
     UpdateTestModelRequest:
