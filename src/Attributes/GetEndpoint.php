@@ -36,6 +36,7 @@ class GetEndpoint extends Get
             ),
             new Response(response: '401', description: 'Unauthorized'),
             new Response(response: '403', description: 'Unauthorized'),
+            new Response(response: '404', description: 'Not Found'),
         ];
         if (! empty($includes)) {
             $parameters[] = AttributeFactory::createIncludeParameter($includes);
