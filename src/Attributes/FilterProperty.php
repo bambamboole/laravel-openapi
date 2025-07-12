@@ -22,20 +22,28 @@ class FilterProperty
         public array|string|null $enum = null,
         public ?string $default = null,
         public bool $partial = false,
+        public ?string $format = null,
     ) {}
 
     public function toProperty(): array|Property
     {
+        if ($this->type === 'date-time') {
+            $this->type = 'string';
+            $this->format = 'date-time';
+        }
+
         return match ($this->multiple) {
             true => new Property(
                 property: $this->name,
                 description: $this->description(),
                 type: 'array',
-                items: new Items(type: $this->type, enum: $this->enum, example: $this->example())
+                items: new Items(type: $this->type, format: $this->format, enum: $this->enum, example: $this->example())
             ),
             false => new Property(
                 property: $this->name,
                 description: $this->description(),
+                type: $this->type,
+                format: $this->format,
                 enum: $this->enum,
                 example: $this->example(),
             ),
