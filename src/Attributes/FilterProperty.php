@@ -50,7 +50,7 @@ class FilterProperty
         };
     }
 
-    private function description(): ?string
+    private function description(): string
     {
         if ($this->description) {
             return $this->description;

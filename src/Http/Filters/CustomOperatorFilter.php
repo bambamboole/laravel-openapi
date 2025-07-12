@@ -111,7 +111,7 @@ class CustomOperatorFilter extends FiltersExact
         }
         if (! $mappedValue) {
             throw ValidationException::withMessages([
-                $property => 'Invalid value: '.$value.'. Valid values are: '.implode(', ', array_map(fn (\BackedEnum $v) => $v->value, $this->enum::cases()))]);
+                $property => 'Invalid value: '.$value.'. Valid values are: '.implode(', ', array_map(fn ($v) => $v->value, $this->enum::cases()))]);
         }
 
         return $mappedValue;

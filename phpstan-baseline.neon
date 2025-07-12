@@ -1,7 +1,25 @@
 parameters:
 	ignoreErrors:
 		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Http/ApiDocsController.php
+
+		-
+			message: '#^Access to an undefined property UnitEnum\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Http/Filters/CustomOperatorFilter.php
+
+		-
 			message: '#^Method Bambamboole\\LaravelOpenApi\\QueryBuilder\:\:getRequest\(\) should return Bambamboole\\LaravelOpenApi\\QueryBuilderRequest but returns Spatie\\QueryBuilder\\QueryBuilderRequest\.$#'
 			identifier: return.type
 			count: 1
 			path: src/QueryBuilder.php
+
+		-
+			message: '#^Call to function is_array\(\) with mixed will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/QueryBuilderRequest.php
