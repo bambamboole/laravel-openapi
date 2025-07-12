@@ -13,6 +13,6 @@ class DummyInclude implements IncludeInterface
 
     public static function make(string $name): Collection
     {
-        return AllowedInclude::custom($name, new static);
+        return AllowedInclude::custom($name, new self);
     }
 }

@@ -3,7 +3,7 @@
 return [
     'oas_version' => '3.1.0',
     'ruleset' => null,
-    'folders' => [__DIR__],
+    'folders' => [__DIR__.'/../TestClasses'],
     'name' => 'My API',
     'version' => '1.0.0',
     'description' => 'Developer API',

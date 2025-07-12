@@ -48,7 +48,7 @@ class QuerySort extends Parameter
             'required' => false,
             'deprecated' => $deprecated ?? Generator::UNDEFINED,
             'allowEmptyValue' => $allowEmptyValue ?? Generator::UNDEFINED,
-            'ref' => $ref ?? Generator::UNDEFINED,
+            'ref' => Generator::UNDEFINED,
             'example' => Generator::UNDEFINED,
             'style' => 'form',
             'explode' => false,

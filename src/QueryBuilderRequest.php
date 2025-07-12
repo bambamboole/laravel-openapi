@@ -31,7 +31,7 @@ class QueryBuilderRequest extends \Spatie\QueryBuilder\QueryBuilderRequest
                     'value' => $this->getFilterValue($value['value']),
                 ]];
             });
-        } catch (\Throwable $e) {
+        } catch (\Throwable) {
             throw ValidationException::withMessages(['filter' => 'Invalid filter format.']);
         }
     }

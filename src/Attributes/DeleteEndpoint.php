@@ -18,7 +18,8 @@ class DeleteEndpoint extends Delete
         ?string $summary = null,
         ?array $parameters = [],
         ?string $operationId = null,
-        array $validates = []
+        array $validates = [],
+        ?string $x = null,
     ) {
         $responses = [
             new Response(response: '204', description: 'Resource successfully deleted'),
@@ -37,10 +38,10 @@ class DeleteEndpoint extends Delete
             'description' => $description ?? Generator::UNDEFINED,
             'summary' => $summary ?? Generator::UNDEFINED,
             'security' => $security ?? Generator::UNDEFINED,
-            'servers' => $servers ?? Generator::UNDEFINED,
+            'servers' => Generator::UNDEFINED,
             'tags' => $tags ?? Generator::UNDEFINED,
-            'callbacks' => $callbacks ?? Generator::UNDEFINED,
-            'deprecated' => $deprecated ?? Generator::UNDEFINED,
+            'callbacks' => Generator::UNDEFINED,
+            'deprecated' => Generator::UNDEFINED,
             'x' => $x ?? Generator::UNDEFINED,
             'value' => $this->combine($responses, $parameters),
         ]);

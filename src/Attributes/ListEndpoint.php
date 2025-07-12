@@ -28,6 +28,7 @@ class ListEndpoint extends Get
         int $defaultPageSize = 15,
         int $maxPageSize = 100,
         PaginationType $paginationType = PaginationType::SIMPLE,
+        ?array $x = null,
     ) {
 
         $responses = [
@@ -53,10 +54,10 @@ class ListEndpoint extends Get
             'description' => $description ?? Generator::UNDEFINED,
             'summary' => $summary ?? Generator::UNDEFINED,
             'security' => $security ?? Generator::UNDEFINED,
-            'servers' => $servers ?? Generator::UNDEFINED,
+            'servers' => Generator::UNDEFINED,
             'tags' => $tags ?? Generator::UNDEFINED,
-            'callbacks' => $callbacks ?? Generator::UNDEFINED,
-            'deprecated' => $deprecated ?? Generator::UNDEFINED,
+            'callbacks' => Generator::UNDEFINED,
+            'deprecated' => Generator::UNDEFINED,
             'x' => $x ?? Generator::UNDEFINED,
             'value' => $this->combine($responses, $parameters),
         ]);
@@ -107,37 +108,35 @@ class ListEndpoint extends Get
             ];
         }
 
-        if ($paginationType === PaginationType::TABLE) {
-            return [
-                new Property(
-                    'links',
-                    properties: [
-                        new Property(property: 'first', type: 'string', nullable: true),
-                        new Property(property: 'last', type: 'string', nullable: true),
-                        new Property(property: 'prev', type: 'string', nullable: true),
-                        new Property(property: 'next', type: 'string', nullable: true),
-                    ],
-                    type: 'object',
-                ),
-                new Property(
-                    'meta',
-                    properties: [
-                        new Property(property: 'current_page', type: 'integer'),
-                        new Property(property: 'from', type: 'integer', nullable: true),
-                        new Property(property: 'last_page', type: 'integer'),
-                        new Property(property: 'links', type: 'array', items: new Items(type: 'object', properties: [
-                            new Property(property: 'url', type: 'string', nullable: true),
-                            new Property(property: 'label', type: 'string'),
-                            new Property(property: 'active', type: 'boolean'),
-                        ])),
-                        new Property(property: 'path', type: 'string'),
-                        new Property(property: 'per_page', type: 'integer'),
-                        new Property(property: 'to', type: 'integer', nullable: true),
-                        new Property(property: 'total', type: 'integer'),
-                    ],
-                    type: 'object',
-                ),
-            ];
-        }
+        return [
+            new Property(
+                'links',
+                properties: [
+                    new Property(property: 'first', type: 'string', nullable: true),
+                    new Property(property: 'last', type: 'string', nullable: true),
+                    new Property(property: 'prev', type: 'string', nullable: true),
+                    new Property(property: 'next', type: 'string', nullable: true),
+                ],
+                type: 'object',
+            ),
+            new Property(
+                'meta',
+                properties: [
+                    new Property(property: 'current_page', type: 'integer'),
+                    new Property(property: 'from', type: 'integer', nullable: true),
+                    new Property(property: 'last_page', type: 'integer'),
+                    new Property(property: 'links', type: 'array', items: new Items(properties: [
+                        new Property(property: 'url', type: 'string', nullable: true),
+                        new Property(property: 'label', type: 'string'),
+                        new Property(property: 'active', type: 'boolean'),
+                    ], type: 'object')),
+                    new Property(property: 'path', type: 'string'),
+                    new Property(property: 'per_page', type: 'integer'),
+                    new Property(property: 'to', type: 'integer', nullable: true),
+                    new Property(property: 'total', type: 'integer'),
+                ],
+                type: 'object',
+            ),
+        ];
     }
 }

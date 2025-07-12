@@ -3,6 +3,8 @@
 namespace Bambamboole\LaravelOpenApi;
 
 use Bambamboole\LaravelOpenApi\Enum\PaginationType;
+use Illuminate\Contracts\Validation\Rule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use OpenApi\Attributes\Items;
 use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Parameter;
@@ -48,7 +50,7 @@ class AttributeFactory
         $missing = [];
         foreach ($matches[1] as $match) {
             $hasParam = count(
-                array_filter($parameters ?? [], fn (Parameter $parameter) => $parameter->name === $match)
+                array_filter($parameters, fn (Parameter $parameter) => $parameter->name === $match)
             ) > 0;
             if ($hasParam) {
                 continue;
@@ -99,39 +101,38 @@ class AttributeFactory
 
     public static function createValidationResponse(string|array $request): Response
     {
-        if (is_string($request)) {
-            $validationData = self::extractValidationInfo($request);
-            $keys = $validationData['keys'];
-            $rules = $validationData['rules'];
+        try {
+            if (is_string($request)) {
+                $validationData = self::extractValidationInfo($request);
 
-            // Generate realistic error messages
-            $errorMessages = [];
-            foreach ($keys as $key) {
-                $rule = $rules[$key] ?? 'required';
-                $errorMessages[$key] = [self::generateLaravelLikeValidationMessage($key, $rule)];
-            }
-        } elseif (is_array($request)) {
-            $errorMessages = [];
+                // Generate realistic error messages
+                $errorMessages = [];
+                foreach ($validationData as $key => $rules) {
+                    $errorMessages[$key] = [self::generateLaravelLikeValidationMessage($key, $rules)];
+                }
+            } elseif (is_array($request)) {
+                $errorMessages = [];
 
-            // Check if array is associative (field => message)
-            if (array_keys($request) !== range(0, count($request) - 1)) {
-                // Associative array - use keys as field names and values as custom messages
-                foreach ($request as $field => $message) {
-                    $errorMessages[$field] = [is_array($message) ? $message[0] : $message];
-                }
-            } else {
-                // Indexed array - use values as field names and generate messages
-                foreach ($request as $field) {
-                    $errorMessages[$field] = [self::generateLaravelLikeValidationMessage($field, 'required')];
+                // Check if array is associative (field => message)
+                if (array_keys($request) !== range(0, count($request) - 1)) {
+                    // Associative array - use keys as field names and values as custom messages
+                    foreach ($request as $field => $message) {
+                        $errorMessages[$field] = [is_array($message) ? $message[0] : $message];
+                    }
+                } else {
+                    // Indexed array - use values as field names and generate messages
+                    foreach ($request as $field) {
+                        $errorMessages[$field] = [self::generateLaravelLikeValidationMessage($field, 'required')];
+                    }
                 }
             }
+        } catch (\Throwable) {
+            $errorMessages = [];
         }
-
         // Fallback if no messages could be generated
         if (empty($errorMessages)) {
             $errorMessages = [
-                'email' => ['The email field is required.'],
-                'street' => ['The street field is required.'],
+                'property' => ['The property is required.'],
             ];
         }
 
@@ -151,14 +152,15 @@ class AttributeFactory
         );
     }
 
-    private static function generateLaravelLikeValidationMessage(string $field, string|array $rule): string
+    public static function generateLaravelLikeValidationMessage(string $field, string|array|ValidationRule|Rule $rule): string
     {
+        if ($rule instanceof Rule) {
+            // If it's a Rule instance, we can use its message method
+            $rule = strtolower(class_basename($rule));
+        }
         // Convert array rules to string for parsing
         if (is_array($rule)) {
-            $rule = array_filter($rule, fn ($v) => is_string($v));
-            $rule = implode('|', array_map(function ($item) {
-                return is_array($item) ? implode(':', $item) : $item;
-            }, $rule));
+            $rule = implode('|', array_filter($rule, fn ($v) => is_string($v)));
         }
 
         // Parse the rules
@@ -218,7 +220,7 @@ class AttributeFactory
         return "The {$formattedField} is invalid.";
     }
 
-    private static function extractValidationInfo(string $requestClass): array
+    public static function extractValidationInfo(string $requestClass): array
     {
         try {
             if (! class_exists($requestClass)) {
@@ -235,15 +237,10 @@ class AttributeFactory
             $rules = $rulesMethod->invoke($reflection->newInstanceWithoutConstructor());
 
             // Get the first two rules
-            $slicedRules = array_slice($rules, 0, 2, true);
-
-            return [
-                'keys' => array_keys($slicedRules),
-                'rules' => $slicedRules,
-            ];
+            return array_slice($rules, 0, 2, true);
         } catch (\Throwable) {
             // Silently fail and return empty array
-            return ['keys' => [], 'rules' => []];
+            return [];
         }
     }
 }
