@@ -50,19 +50,7 @@
         "test:coverage": "vendor/bin/pest --coverage-html coverage",
         "test:ci": "vendor/bin/pest --coverage-clover coverage.xml",
         "phpstan:analyse": "vendor/bin/phpstan analyse --ansi --memory-limit=4G",
-        "phpstan:baseline": "vendor/bin/phpstan analyse --generate-baseline --memory-limit=4G",
-        "post-autoload-dump": [
-            "@clear",
-            "@prepare"
-        ],
-        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
-        "prepare": "@php vendor/bin/testbench package:discover --ansi",
-        "build": "@php vendor/bin/testbench workbench:build --ansi",
-        "serve": [
-            "Composer\\Config::disableProcessTimeout",
-            "@build",
-            "@php vendor/bin/testbench serve --ansi"
-        ]
+        "phpstan:baseline": "vendor/bin/phpstan analyse --generate-baseline --memory-limit=4G"
     },
     "config": {
         "sort-packages": true,
