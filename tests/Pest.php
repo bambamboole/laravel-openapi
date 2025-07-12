@@ -17,3 +17,8 @@ function createQueryFromFilterRequest(array $filters, ?string $model = null): Qu
 
     return QueryBuilder::for($model, $request);
 }
+
+function fixture(string $name): string
+{
+    return __DIR__.'/Fixtures/'.ltrim($name, '/');
+}

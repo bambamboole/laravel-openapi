@@ -1,28 +1,18 @@
 <?php declare(strict_types=1);
 
 use Bambamboole\LaravelOpenApi\OpenApiGeneratorFactory;
-use OpenApi\Util;
+use Symfony\Component\Finder\Finder;
 
-dataset('fixtureFolders', function () {
-    $fixturesDir = __DIR__.'/../Fixtures';
-    $folders = glob($fixturesDir.'/*', GLOB_ONLYDIR);
-
-    foreach ($folders as $folder) {
-        yield [$folder];
-    }
-});
-
-it('matches the fixture', function (string $folder) {
+it('matches the fixture', function () {
     $factory = new OpenApiGeneratorFactory;
-    $config = require $folder.'/config.php';
+    $config = require fixture('config.php');
     $generator = $factory->create($config);
-
-    $actualYaml = $generator->generate(Util::finder($config['folders']))->toYaml();
-    $expectedYamlPath = $folder.'/expected.yml';
+    $actualYaml = $generator->generate(Finder::create()->in($config['folders'])->files())->toYaml();
+    $expectedYamlPath = fixture('expected.yml');
     if (! file_exists($expectedYamlPath)) {
         file_put_contents($expectedYamlPath, $actualYaml);
         test()->markTestIncomplete('Expected YAML file does not exist. Created it for you. Please run test again.');
     }
 
     expect(file_get_contents($expectedYamlPath))->toBe($actualYaml);
-})->with('fixtureFolders');
+});
