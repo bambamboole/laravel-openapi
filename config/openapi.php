@@ -30,5 +30,10 @@ return [
     ],
     'merge' => [
         'schemas' => ['default'],
+        'files' => [
+            // base_path('another_file.yml'),
+            // base_path('another_file.json'),
+        ],
+        'output' => base_path('openapi_bundle.yml'),
     ],
 ];

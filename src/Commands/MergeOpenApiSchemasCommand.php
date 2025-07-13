@@ -19,7 +19,10 @@ class MergeOpenApiSchemasCommand extends Command
 
     public function handle(): int
     {
-        $files = array_map(fn ($schema) => config("openapi.schemas.$schema.output"), config('openapi.merge.schemas'));
+        $files = array_merge(
+            array_map(fn ($schema) => config("openapi.schemas.$schema.output"), config('openapi.merge.schemas')),
+            config('openapi.merge.files', []),
+        );
         $merger = new OpenApiMerge(
             new FileReader,
             [
@@ -39,7 +42,7 @@ class MergeOpenApiSchemasCommand extends Command
             ),
         );
 
-        $outputFileName = base_path('openapi.yaml');
+        $outputFileName = config('openapi.merge.output', base_path('openapi_merged.yml'));
         touch($outputFileName);
         $outputFile = new File($outputFileName);
         $specificationFile = new SpecificationFile(
