@@ -27,7 +27,7 @@ class PostEndpoint extends Post
         ?string $operationId = null,
         string $successStatus = '200',
         string $contentType = 'application/json',
-        ?array $x = [],
+        bool $isInternal = false,
     ) {
         $responses = [
             new Response(
@@ -59,7 +59,7 @@ class PostEndpoint extends Post
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => Generator::UNDEFINED,
-            'x' => $x ?? Generator::UNDEFINED,
+            'x' => $isInternal ? ['internal' => true] : Generator::UNDEFINED,
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }

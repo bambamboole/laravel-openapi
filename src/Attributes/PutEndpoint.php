@@ -23,7 +23,7 @@ class PutEndpoint extends Put
         ?string $summary = null,
         ?array $parameters = [],
         ?string $operationId = null,
-        ?array $x = [],
+        bool $isInternal = false,
     ) {
         $responses = [
             new Response(
@@ -55,7 +55,7 @@ class PutEndpoint extends Put
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => Generator::UNDEFINED,
-            'x' => $x ?? Generator::UNDEFINED,
+            'x' => $isInternal ? ['internal' => true] : Generator::UNDEFINED,
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }

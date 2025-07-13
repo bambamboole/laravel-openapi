@@ -22,7 +22,7 @@ class GetEndpoint extends Get
         ?array $parameters = [],
         ?string $operationId = null,
         array $includes = [],
-        ?array $x = null,
+        bool $isInternal = false,
     ) {
         $responses = [
             new Response(
@@ -54,7 +54,7 @@ class GetEndpoint extends Get
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => Generator::UNDEFINED,
-            'x' => $x ?? Generator::UNDEFINED,
+            'x' => $isInternal ? ['internal' => true] : Generator::UNDEFINED,
             'value' => $this->combine($responses, $parameters),
         ]);
     }

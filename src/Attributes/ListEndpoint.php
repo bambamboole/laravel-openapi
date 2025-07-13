@@ -28,7 +28,7 @@ class ListEndpoint extends Get
         int $defaultPageSize = 15,
         int $maxPageSize = 100,
         PaginationType $paginationType = PaginationType::SIMPLE,
-        ?array $x = null,
+        bool $isInternal = false,
     ) {
 
         $responses = [
@@ -58,7 +58,7 @@ class ListEndpoint extends Get
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => Generator::UNDEFINED,
-            'x' => $x ?? Generator::UNDEFINED,
+            'x' => $isInternal ? ['internal' => true] : Generator::UNDEFINED,
             'value' => $this->combine($responses, $parameters),
         ]);
     }
