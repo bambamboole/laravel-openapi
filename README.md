@@ -31,7 +31,8 @@ It enables you to manage multiple openapi schema files in a single project. The 
 the `openapi.php` config file.
 
 The package provides opinionated and straight forward PHP 8 attributes to define OpenAPI specifications directly in your
-controller methods and request/resource classes. The package provides a set of predefined attributes for common HTTP methods (GET, POST, PUT,
+controller methods and request/resource classes. The package provides a set of predefined attributes for common HTTP
+methods (GET, POST, PUT,
 PATCH, DELETE) that automatically:
 
 - Generate endpoint documentation with proper path parameters
@@ -148,6 +149,7 @@ define a list endpoint for sales orders.
 We are leveraging the `spatie/laravel-query-builder` package to provide an easy filter implementation. Nevertheless, the
 filters are adapted to our conventions. This means, that a filter in the url always contains `key`, `op` and `value`.
 Examples are as follows:
+
 ```bash
 /api/v1/sales-orders?filter[0][key]=documentNumber&filter[0][op]=eq&filter[0][value]=12345
 /api/v1/sales-orders?filter[0][key]=documentNumber&filter[0][op]=in&filter[0][value][]=12345&filter[0][value][]=54321
@@ -363,7 +365,8 @@ return [
 
 #### Multiple Schemas
 
-You can define multiple schemas in the configuration file. Each schema can have its own settings, including which folders to scan, output file, and other OpenAPI information.
+You can define multiple schemas in the configuration file. Each schema can have its own settings, including which
+folders to scan, output file, and other OpenAPI information.
 
 ```php
 'schemas' => [
@@ -386,19 +389,71 @@ To generate a specific schema, you can pass the schema name to the `openapi:gene
 php artisan openapi:generate v1
 ```
 
+### Merging OpenAPI Schemas
+
+If your project defines multiple OpenAPI schemas (for example, for different API versions or modules), you can merge
+them into a single specification file using the provided Artisan command.
+
+#### Configuration
+
+In your `config/openapi.php`, specify which schemas to merge and the output file:
+
+```php
+'merge' => [
+    'schemas' => ['default', 'v2'], // List the schema keys you want to merge
+    'files' => [base_path('extra_spec.json')], // (Optional) Additional files to merge
+    'output' => base_path('openapi_merged.yml'), // (Optional) Output file path
+],
+```
+
+- `schemas`: Array of schema keys defined in the `schemas` section to merge.
+- `files`: (Optional) Additional OpenAPI files to include in the merge.
+- `output`: (Optional) Path for the merged output file. Defaults to `openapi_merged.yml` in the project root.
+
 #### Merging Schemas
 
-If you have multiple schemas, you can merge them into a single file using the `openapi:merge` command:
+Run the following Artisan command to merge the specified schemas and files:
 
 ```bash
 php artisan openapi:merge
 ```
 
-This will merge the schemas specified in the `merge.schemas` configuration into a single file at the project root (`openapi.yaml`).
+This will generate a single merged OpenAPI file at the location specified in your configuration.
+
+#### Example
+
+Suppose you have two schemas, `v1` and `v2`, defined in your config:
+
+```php
+'schemas' => [
+    'v1' => [
+        'folders' => [base_path('app/Http/Controllers/Api/V1')],
+        'output' => base_path('openapi-v1.yml'),
+    ],
+    'v2' => [
+        'folders' => [base_path('app/Http/Controllers/Api/V2')],
+        'output' => base_path('openapi-v2.yml'),
+    ],
+],
+```
+
+And your merge config:
+
+```php
+'merge' => [
+    'schemas' => ['v1', 'v2'],
+    'files' => [base_path('extra_spec.json')], // Optional additional files from other sources
+    'output' => base_path('openapi_merged.yml'),
+],
+```
+
+After running `php artisan openapi:merge`, you will find the merged OpenAPI spec at `openapi_merged.yml`. By changing
+the file extion to `json`, it will generate a json file.
 
 ### Web Interface
 
-The package provides a web interface for viewing the OpenAPI documentation. By default, it's available at `/api-docs` and is protected by the `web` and `auth` middleware.
+The package provides a web interface for viewing the OpenAPI documentation. By default, it's available at `/api-docs`
+and is protected by the `web` and `auth` middleware.
 
 You can configure the web interface in the `docs` section of the configuration file:
 
