@@ -283,7 +283,7 @@
                     "422": {
                         "description": "Failed validation",
                         "content": {
-                            "application/json": {
+                            "application/problem+json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {
@@ -518,7 +518,7 @@
                     "422": {
                         "description": "Failed validation",
                         "content": {
-                            "application/json": {
+                            "application/problem+json": {
                                 "schema": {
                                     "type": "object",
                                     "properties": {

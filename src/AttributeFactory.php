@@ -6,7 +6,7 @@ use Bambamboole\LaravelOpenApi\Enum\PaginationType;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Contracts\Validation\ValidationRule;
 use OpenApi\Attributes\Items;
-use OpenApi\Attributes\JsonContent;
+use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\Response;
@@ -139,15 +139,19 @@ class AttributeFactory
         return new Response(
             response: '422',
             description: 'Failed validation',
-            content: new JsonContent(
-                properties: [
-                    new Property('message', type: 'string',
-                        example: reset($errorMessages)[0] ?? 'The validation failed.',
-                    ),
-                    new Property('errors', type: 'object',
-                        example: $errorMessages,
-                    ),
-                ],
+            content: new MediaType(
+                mediaType: 'application/problem+json',
+                schema: new Schema(
+                    properties: [
+                        new Property('message', type: 'string',
+                            example: reset($errorMessages)[0] ?? 'The validation failed.',
+                        ),
+                        new Property('errors', type: 'object',
+                            example: $errorMessages,
+                        ),
+                    ],
+                    type: 'object',
+                )
             )
         );
     }

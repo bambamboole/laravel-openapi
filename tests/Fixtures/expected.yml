@@ -100,7 +100,7 @@ paths:
         '422':
           description: 'Failed validation'
           content:
-            application/json:
+            application/problem+json:
               schema:
                 properties:
                   message: { type: string, example: 'The name is invalid.' }
@@ -191,7 +191,7 @@ paths:
         '422':
           description: 'Failed validation'
           content:
-            application/json:
+            application/problem+json:
               schema:
                 properties:
                   message: { type: string, example: 'The property is required.' }
