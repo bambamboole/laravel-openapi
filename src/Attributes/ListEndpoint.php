@@ -6,14 +6,14 @@ use Bambamboole\LaravelOpenApi\AttributeFactory;
 use Bambamboole\LaravelOpenApi\Enum\PaginationType;
 use OpenApi\Annotations\Get;
 use OpenApi\Attributes\Items;
-use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Property;
-use OpenApi\Attributes\Response;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class ListEndpoint extends Get
 {
+    use HasEndpointHelpers;
+
     public function __construct(
         string $path,
         string $resource,
@@ -29,15 +29,15 @@ class ListEndpoint extends Get
         int $maxPageSize = 100,
         PaginationType $paginationType = PaginationType::SIMPLE,
         bool $isInternal = false,
+        ?\DateTimeInterface $deprecated = null,
     ) {
-
         $responses = [
-            new Response(response: '200', description: $description, content: new JsonContent(properties: [
+            $this->response('200', $description, [
                 new Property('data', type: 'array', items: new Items(ref: $resource)),
                 ...$this->getPaginationProperties($paginationType),
-            ])),
-            new Response(response: '401', description: 'Unauthorized'),
-            new Response(response: '403', description: 'Unauthorized'),
+            ]),
+            $this->response401(),
+            $this->response403(),
         ];
         $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
         if (! empty($filters)) {
@@ -57,8 +57,8 @@ class ListEndpoint extends Get
             'servers' => Generator::UNDEFINED,
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
-            'deprecated' => Generator::UNDEFINED,
-            'x' => $isInternal ? ['internal' => true] : Generator::UNDEFINED,
+            'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
+            'x' => $this->parseX($isInternal, $deprecated),
             'value' => $this->combine($responses, $parameters),
         ]);
     }

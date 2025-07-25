@@ -4,17 +4,17 @@ namespace Bambamboole\LaravelOpenApi\Attributes;
 
 use Bambamboole\LaravelOpenApi\AttributeFactory;
 use OpenApi\Annotations\Post;
-use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\RequestBody;
-use OpenApi\Attributes\Response;
 use OpenApi\Attributes\Schema;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class PostEndpoint extends Post
 {
+    use HasEndpointHelpers;
+
     public function __construct(
         string $path,
         string $request,
@@ -28,20 +28,15 @@ class PostEndpoint extends Post
         string $successStatus = '200',
         string $contentType = 'application/json',
         bool $isInternal = false,
+        ?\DateTimeInterface $deprecated = null,
     ) {
         $responses = [
-            new Response(
-                response: $successStatus,
-                description: $description,
-                content: new JsonContent(
-                    properties: [
-                        new Property('data', ref: $resource),
-                    ]
-                )
-            ),
+            $this->response($successStatus, $description, [
+                new Property('data', ref: $resource),
+            ]),
             AttributeFactory::createValidationResponse($request),
-            new Response(response: '401', description: 'Unauthorized'),
-            new Response(response: '403', description: 'Unauthorized'),
+            $this->response401(),
+            $this->response403(),
         ];
 
         $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
@@ -58,8 +53,8 @@ class PostEndpoint extends Post
             'servers' => Generator::UNDEFINED,
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
-            'deprecated' => Generator::UNDEFINED,
-            'x' => $isInternal ? ['internal' => true] : Generator::UNDEFINED,
+            'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
+            'x' => $this->parseX($isInternal, $deprecated),
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }

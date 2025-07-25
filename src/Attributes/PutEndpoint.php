@@ -7,12 +7,13 @@ use OpenApi\Annotations\Put;
 use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Property;
 use OpenApi\Attributes\RequestBody;
-use OpenApi\Attributes\Response;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class PutEndpoint extends Put
 {
+    use HasEndpointHelpers;
+
     public function __construct(
         string $path,
         string $request,
@@ -24,20 +25,15 @@ class PutEndpoint extends Put
         ?array $parameters = [],
         ?string $operationId = null,
         bool $isInternal = false,
+        ?\DateTimeInterface $deprecated = null,
     ) {
         $responses = [
-            new Response(
-                response: '200',
-                description: $description,
-                content: new JsonContent(
-                    properties: [
-                        new Property('data', ref: $resource),
-                    ]
-                )
-            ),
+            $this->response('200', $description, [
+                new Property('data', ref: $resource),
+            ]),
             AttributeFactory::createValidationResponse($request),
-            new Response(response: '401', description: 'Unauthorized'),
-            new Response(response: '403', description: 'Unauthorized'),
+            $this->response401(),
+            $this->response403(),
         ];
 
         $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
@@ -54,8 +50,8 @@ class PutEndpoint extends Put
             'servers' => Generator::UNDEFINED,
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
-            'deprecated' => Generator::UNDEFINED,
-            'x' => $isInternal ? ['internal' => true] : Generator::UNDEFINED,
+            'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
+            'x' => $this->parseX($isInternal, $deprecated),
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }
