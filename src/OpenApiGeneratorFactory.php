@@ -2,6 +2,7 @@
 
 namespace Bambamboole\LaravelOpenApi;
 
+use Illuminate\Support\Arr;
 use OpenApi\Analysers\AttributeAnnotationFactory;
 use OpenApi\Analysers\DocBlockAnnotationFactory;
 use OpenApi\Analysers\ReflectionAnalyser;
@@ -13,13 +14,16 @@ class OpenApiGeneratorFactory
 {
     public function create(array $config): Generator
     {
+
         $generator = new Generator(new ConsoleLogger);
         $generator->getProcessorPipeline()->insert(new AddMetaInfoProcessor($config), fn () => 1);
         $generator->getProcessorPipeline()->remove(OperationId::class);
         $generator->getProcessorPipeline()->add(new OperationIdProcessor);
-        $generator->getProcessorPipeline()->add(new ValidationResponseStatusCodeProcessor($config['validation_status_code'] ?? 422));
+        $generator->getProcessorPipeline()->add(new ValidationResponseStatusCodeProcessor(Arr::get($config, 'validation_status_code', 422)));
         $generator->getProcessorPipeline()->add(new SortComponentsProcessor);
-        $generator->getProcessorPipeline()->add(new FilterDeprecationsProcessor($config['months_before_remove_deprecated'] ?? 6));
+        if (Arr::get($config, 'deprecation_filter.enabled', false)) {
+            $generator->getProcessorPipeline()->add(new FilterDeprecationsProcessor(Arr::get($config, 'deprecation_filter.months_before_removal', 6)));
+        }
 
         $analyzer = new ReflectionAnalyser([new DocBlockAnnotationFactory, new AttributeAnnotationFactory]);
 
