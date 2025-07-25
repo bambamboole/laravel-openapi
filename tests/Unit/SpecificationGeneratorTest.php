@@ -14,5 +14,5 @@ it('matches the fixture', function () {
         $this->markTestIncomplete('Expected YAML file does not exist. Created it for you. Please run test again.');
     }
 
-    expect(file_get_contents($expectedYamlPath))->toBe($actualYaml);
+    expect($actualYaml)->toBe(file_get_contents($expectedYamlPath));
 });

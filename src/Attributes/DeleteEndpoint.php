@@ -4,12 +4,13 @@ namespace Bambamboole\LaravelOpenApi\Attributes;
 
 use Bambamboole\LaravelOpenApi\AttributeFactory;
 use OpenApi\Annotations\Delete;
-use OpenApi\Attributes\Response;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class DeleteEndpoint extends Delete
 {
+    use HasEndpointHelpers;
+
     public function __construct(
         string $path,
         ?string $description = null,
@@ -19,12 +20,13 @@ class DeleteEndpoint extends Delete
         ?array $parameters = [],
         ?string $operationId = null,
         array $validates = [],
-        ?string $x = null,
+        bool $isInternal = false,
+        ?\DateTimeInterface $deprecated = null,
     ) {
         $responses = [
-            new Response(response: '204', description: 'Resource successfully deleted'),
-            new Response(response: '401', description: 'Unauthorized'),
-            new Response(response: '403', description: 'Unauthorized'),
+            $this->response('204', 'Resource successfully deleted'),
+            $this->response401(),
+            $this->response403(),
         ];
         if (! empty($validates)) {
             $responses[] = AttributeFactory::createValidationResponse($validates);
@@ -41,8 +43,8 @@ class DeleteEndpoint extends Delete
             'servers' => Generator::UNDEFINED,
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
-            'deprecated' => Generator::UNDEFINED,
-            'x' => $x ?? Generator::UNDEFINED,
+            'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
+            'x' => $this->parseX($isInternal, $deprecated),
             'value' => $this->combine($responses, $parameters),
         ]);
     }

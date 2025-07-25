@@ -4,14 +4,14 @@ namespace Bambamboole\LaravelOpenApi\Attributes;
 
 use Bambamboole\LaravelOpenApi\AttributeFactory;
 use OpenApi\Annotations\Get;
-use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Property;
-use OpenApi\Attributes\Response;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
 class GetEndpoint extends Get
 {
+    use HasEndpointHelpers;
+
     public function __construct(
         string $path,
         string $resource,
@@ -23,20 +23,15 @@ class GetEndpoint extends Get
         ?string $operationId = null,
         array $includes = [],
         bool $isInternal = false,
+        ?\DateTimeInterface $deprecated = null,
     ) {
         $responses = [
-            new Response(
-                response: '200',
-                description: $description,
-                content: new JsonContent(
-                    properties: [
-                        new Property('data', ref: $resource),
-                    ]
-                )
-            ),
-            new Response(response: '401', description: 'Unauthorized'),
-            new Response(response: '403', description: 'Unauthorized'),
-            new Response(response: '404', description: 'Not Found'),
+            $this->response('200', $description, [
+                new Property('data', ref: $resource),
+            ]),
+            $this->response401(),
+            $this->response403(),
+            $this->response404(),
         ];
         if (! empty($includes)) {
             $parameters[] = AttributeFactory::createIncludeParameter($includes);
@@ -53,8 +48,8 @@ class GetEndpoint extends Get
             'servers' => Generator::UNDEFINED,
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
-            'deprecated' => Generator::UNDEFINED,
-            'x' => $isInternal ? ['internal' => true] : Generator::UNDEFINED,
+            'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
+            'x' => $this->parseX($isInternal, $deprecated),
             'value' => $this->combine($responses, $parameters),
         ]);
     }

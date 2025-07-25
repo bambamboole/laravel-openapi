@@ -11,6 +11,10 @@ return [
             'ruleset' => null,
             'folders' => [base_path('app')],
             'output' => base_path('openapi.yml'),
+            'deprecation_filter' => [
+                'enabled' => true,
+                'months_before_removal' => 6,
+            ],
             'validation_status_code' => 422,
             'name' => 'My API',
             'version' => '1.0.0',
