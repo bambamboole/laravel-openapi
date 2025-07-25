@@ -16,7 +16,7 @@ class FilterDeprecationsProcessor
         /** @var OA\PathItem $path */
         foreach ($analysis->openapi->paths as $index => $path) {
             foreach ($path->operations() as $operation) {
-                if (isset($operation->deprecated) && $operation->deprecated === true) {
+                if ($operation->deprecated !== Generator::UNDEFINED && $operation->deprecated === true) {
                     $date = Carbon::createFromFormat('Y-m-d', $operation->x['deprecated_on'] ?? 'now');
                     // compare the deprecation date with the current date minus the monthBeforeRemoval
                     if ($date->addMonths($this->monthBeforeRemoval)->isBefore(now())) {
