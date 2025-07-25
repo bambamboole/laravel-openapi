@@ -11,7 +11,6 @@ return [
     'name' => 'My API',
     'version' => '1.0.0',
     'description' => 'Developer API',
-
     'contact' => [
         'name' => 'API Support',
         'url' => 'https://.example.com',
