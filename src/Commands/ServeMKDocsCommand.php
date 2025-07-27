@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Process;
 
 class ServeMKDocsCommand extends Command
 {
-    protected $signature = 'mkdocs:serve {--path : The base path for the docs output directory}';
+    protected $signature = 'mkdocs:serve {--path : The base path for the docs output directory} {--port=9090 : The port to serve the documentation on}';
 
     protected bool $shouldKeepRunning = true;
 
@@ -24,11 +24,12 @@ class ServeMKDocsCommand extends Command
         $docsBaseDir = $this->option('path') ?: config('mkdocs.output');
         $this->call('mkdocs:generate', ['--path' => $docsBaseDir]);
 
+        $port = $this->option('port');
         // Note: The command below is commented out because it does not work as expected in the current context.
         // $cmd = "docker run --rm -it -p 9090:8000 -v {$docsBaseDir}:/docs squidfunk/mkdocs-material serve";
         $cmd = [
             'docker', 'run', '--rm', '-it',
-            '-p', '9090:9090',
+            '-p', $port.':'.$port,
             '-v', "{$docsBaseDir}:/docs",
             '-e', 'ADD_MODULES=mkdocs-material pymdown-extensions',
             '-e', 'LIVE_RELOAD_SUPPORT=true',
@@ -36,7 +37,7 @@ class ServeMKDocsCommand extends Command
             '-e', 'DOCS_DIRECTORY=/docs',
             '-e', 'AUTO_UPDATE=true',
             '-e', 'UPDATE_INTERVAL=1',
-            '-e', 'DEV_ADDR=0.0.0.0:9090',
+            '-e', 'DEV_ADDR=0.0.0.0:'.$port,
             'polinux/mkdocs',
         ];
 
