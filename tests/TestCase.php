@@ -5,6 +5,7 @@ namespace Bambamboole\LaravelOpenApi\Tests;
 use Bambamboole\LaravelOpenApi\OpenApiServiceProvider;
 use Bambamboole\LaravelOpenApi\QueryBuilderRequest;
 use Bambamboole\LaravelOpenApi\Tests\TestClasses\Http\Controller\TestController;
+use Bambamboole\LaravelOpenApi\Tests\TestClasses\Providers\WorkbenchServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Application;
@@ -48,6 +49,7 @@ class TestCase extends Orchestra
     {
         return [
             OpenApiServiceProvider::class,
+            WorkbenchServiceProvider::class,
         ];
     }
 }

@@ -1,0 +1,5 @@
+laravel: '@testbench'
+
+providers:
+   - Bambamboole\LaravelOpenApi\OpenApiServiceProvider
+   - Bambamboole\LaravelOpenApi\Tests\TestClasses\Providers\WorkbenchServiceProvider
