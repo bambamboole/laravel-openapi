@@ -38,7 +38,7 @@ class MkDocsGenerator
         array_unshift($navStructure, ['Home' => 'index.md']);
 
         // Generate config
-        $config = config()->array('mkdocs.config', []);
+        $config = config('mkdocs.config', []);
         $config['nav'] = $navStructure;
         $this->dumpAsYaml($config, $docsBaseDir.'/mkdocs.yml');
     }

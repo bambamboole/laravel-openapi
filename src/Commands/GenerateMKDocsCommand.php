@@ -89,7 +89,7 @@ class GenerateMKDocsCommand extends Command
         $parser = (new ParserFactory)->createForNewestSupportedVersion();
         $files = Finder::create()
             ->files()
-            ->in(config()->array('mkdocs.paths'))
+            ->in(config('mkdocs.paths', []))
             ->name('*.php');
 
         $functionalExtractor = new FunctionalDocBlockExtractor;

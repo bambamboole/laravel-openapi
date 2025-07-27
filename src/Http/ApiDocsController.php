@@ -49,12 +49,12 @@ class ApiDocsController
 
     public function schema(string $schema): JsonResponse
     {
-        $path = config()->string('openapi.schemas.'.$schema.'.output');
+        $path = config('openapi.schemas.'.$schema.'.output', '');
 
         if (! $path) {
             abort(404, 'Schema not found');
         }
-        $spec = str_ends_with($path, '.json')
+        $spec = str_ends_with((string) $path, '.json')
             ? json_decode(File::get($path), true)
             : Yaml::parse(File::get($path));
 
