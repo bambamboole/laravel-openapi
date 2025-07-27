@@ -25,6 +25,7 @@ class OpenApiServiceProvider extends ServiceProvider
                 Commands\GenerateOpenApiSpecCommand::class,
                 Commands\MergeOpenApiSchemasCommand::class,
                 Commands\GenerateMKDocsCommand::class,
+                Commands\ServeMKDocsCommand::class,
             ]);
         }
     }
