@@ -61,11 +61,11 @@ use Symfony\Component\Yaml\Yaml;
  */
 class GenerateMKDocsCommand extends Command
 {
-    protected $signature = 'mkdocs:generate {path? : The base path for the docs output directory}';
+    protected $signature = 'mkdocs:generate {--path : The base path for the docs output directory}';
 
     public function handle(Filesystem $fs): int
     {
-        $docsBaseDir = $this->hasArgument('path') ? $this->argument('path') : config('mkdocs.output');
+        $docsBaseDir = $this->option('path') ?: config('mkdocs.output');
         $mkdocsConfigPath = $docsBaseDir.'/mkdocs.yml';
         $docsOutputDir = $docsBaseDir.'/generated';
 
@@ -102,7 +102,6 @@ class GenerateMKDocsCommand extends Command
         $this->components->info('Building documentation registry...');
 
         $registry = [];
-        $titleMap = [];
         $navPathMap = [];
         foreach ($documentationNodes as $node) {
             $pathSegments = array_map('trim', explode('/', $node['navPath']));
@@ -112,7 +111,6 @@ class GenerateMKDocsCommand extends Command
             $urlParts[] = $this->slug($pageTitle).'.md';
 
             $registry[$node['owner']] = implode('/', $urlParts);
-            $titleMap[$node['owner']] = $pageTitle;
             $navPathMap[$node['owner']] = $node['navPath'];
         }
 
@@ -131,177 +129,8 @@ class GenerateMKDocsCommand extends Command
 
         $this->components->info('Building documentation tree...');
 
-        $docTree = [];
-        $pathRegistry = [];
-
-        foreach ($documentationNodes as $node) {
-            $pathSegments = array_map('trim', explode('/', $node['navPath']));
-            $originalPageTitle = array_pop($pathSegments);
-            $pageTitle = $originalPageTitle;
-
-            // --- Handle potential conflicts by enumerating file names ---
-            $baseFileName = $this->slug($pageTitle);
-
-            $pathForConflictCheck = implode('/', array_map($this->slug(...), $pathSegments)).'/'.$baseFileName.'.md';
-
-            if (isset($pathRegistry[$pathForConflictCheck])) {
-                $pathRegistry[$pathForConflictCheck]['count']++;
-                $count = $pathRegistry[$pathForConflictCheck]['count'];
-                $pageTitle .= " ({$count})"; // Update display title
-                $pageFileName = $baseFileName."-({$count}).md"; // Update file name
-
-                $originalNodeInfo = $pathRegistry[$pathForConflictCheck]['nodes'][0];
-                // Log conflict information
-
-                $msg = "\n[CONFLICT] Duplicate navigation path '{$node['navPath']}'.\n";
-                $msg .= "  - Original: {$originalNodeInfo['sourceFile']}:{$originalNodeInfo['startLine']} ({$originalNodeInfo['owner']})\n";
-                $msg .= "  - New:      {$node['sourceFile']}:{$node['startLine']} ({$node['owner']})\n";
-                $msg .= "  - Action:   Creating enumerated page '{$pageTitle}'.\n";
-                $this->components->warn($msg);
-
-                $pathRegistry[$pathForConflictCheck]['nodes'][] = $node;
-
-            } else {
-                $pageFileName = $baseFileName.'.md';
-                $pathRegistry[$pathForConflictCheck] = [
-                    'count' => 1,
-                    'nodes' => [$node],
-                ];
-            }
-
-            // --- Generate Markdown Content ---
-            $markdownContent = "# {$pageTitle}\n\n";
-            $markdownContent .= "Source: `{$node['owner']}`\n{:.page-subtitle}\n\n";
-            $markdownContent .= $node['description'];
-
-            // --- Add "Building Blocks Used" section ---
-            if (! empty($node['uses'])) {
-                $markdownContent .= "\n\n## Building Blocks Used\n\n";
-                $markdownContent .= "This functionality is composed of the following reusable components:\n\n";
-
-                $mermaidLinks = [];
-                $mermaidContent = "graph LR\n";
-                $ownerId = $this->slug($node['owner']);
-                $ownerNavPath = $navPathMap[$node['owner']] ?? $pageTitle;
-                $mermaidContent .= "    {$ownerId}[\"{$ownerNavPath}\"];\n";
-
-                $sourcePath = $registry[$node['owner']] ?? '';
-
-                foreach ($node['uses'] as $used) {
-                    $usedRaw = trim($used);
-                    $lookupKey = ltrim($usedRaw, '\\');
-                    $usedId = $this->slug($usedRaw);
-                    $usedNavPath = $navPathMap[$lookupKey] ?? $usedRaw;
-
-                    if (isset($registry[$lookupKey])) {
-                        $targetPath = $registry[$lookupKey];
-                        $relativeFilePath = $this->makeRelativePath($targetPath, $sourcePath);
-                        $relativeUrl = $this->toCleanUrl($relativeFilePath);
-
-                        $markdownContent .= "* [{$usedNavPath}]({$relativeUrl})\n";
-                        $mermaidContent .= "    {$ownerId} --> {$usedId}[\"{$usedNavPath}\"];\n";
-                        $mermaidLinks[] = "click {$usedId} \"{$relativeUrl}\" \"View documentation for {$usedRaw}\"";
-                    } else {
-                        $markdownContent .= "* {$usedNavPath} (Not documented)\n";
-                        $mermaidContent .= "    {$ownerId} --> {$usedId}[\"{$usedNavPath}\"];\n";
-                    }
-                }
-
-                $markdownContent .= "\n\n### Composition Graph\n\n";
-                $markdownContent .= "```mermaid\n";
-                $markdownContent .= $mermaidContent;
-                $markdownContent .= "    style {$ownerId} fill:#ffe7cd,stroke:#b38000,stroke-width:4px\n";
-                if (! empty($mermaidLinks)) {
-                    $markdownContent .= '    '.implode("\n    ", $mermaidLinks)."\n";
-                }
-                $markdownContent .= "```\n";
-            }
-
-            // --- Add "Used By Building Blocks" section ---
-            $ownerKey = $node['owner'];
-            if (isset($usedBy[$ownerKey])) {
-                $markdownContent .= "\n\n## Used By Building Blocks\n\n";
-                $markdownContent .= "This component is a building block for the following functionalities:\n\n";
-
-                $mermaidLinks = [];
-                $mermaidContent = "graph LR\n";
-                $ownerId = $this->slug($ownerKey);
-                $ownerNavPath = $navPathMap[$ownerKey] ?? $pageTitle;
-                $mermaidContent .= "    {$ownerId}[\"{$ownerNavPath}\"];\n";
-
-                $sourcePath = $registry[$ownerKey] ?? '';
-
-                foreach ($usedBy[$ownerKey] as $user) {
-                    $userKey = ltrim(trim($user), '\\');
-                    $userId = $this->slug($userKey);
-                    $userNavPath = $navPathMap[$userKey] ?? $userKey;
-
-                    if (isset($registry[$userKey])) {
-                        $targetPath = $registry[$userKey];
-                        $relativeFilePath = $this->makeRelativePath($targetPath, $sourcePath);
-                        $relativeUrl = $this->toCleanUrl($relativeFilePath);
-
-                        $markdownContent .= "* [{$userNavPath}]({$relativeUrl})\n";
-                        $mermaidContent .= "    {$userId}[\"{$userNavPath}\"] --> {$ownerId};\n";
-                        $mermaidLinks[] = "click {$userId} \"{$relativeUrl}\" \"View documentation for {$user}\"";
-                    } else {
-                        $markdownContent .= "* {$userNavPath} (Not documented)\n";
-                        $mermaidContent .= "    {$userId}[\"{$userNavPath}\"] --> {$ownerId};\n";
-                    }
-                }
-
-                $markdownContent .= "\n\n### Dependency Graph\n\n";
-                $markdownContent .= "```mermaid\n";
-                $markdownContent .= $mermaidContent;
-                $markdownContent .= "    style {$ownerId} fill:#ffe7cd,stroke:#b38000,stroke-width:4px\n";
-                if (! empty($mermaidLinks)) {
-                    $markdownContent .= '    '.implode("\n    ", $mermaidLinks)."\n";
-                }
-                $markdownContent .= "```\n";
-            }
-
-            // Add "Further reading" section
-            if (! empty($node['links'])) {
-                $markdownContent .= "\n\n## Further reading\n\n";
-                foreach ($node['links'] as $link) {
-                    $trimmedLink = trim($link);
-                    if (preg_match('/^\[.*\]\s*\(.*\)$/', $trimmedLink)) {
-                        $markdownContent .= "* {$trimmedLink}\n";
-                    } elseif (preg_match('/^(\S+)\s+(.*)$/', $trimmedLink, $matches)) {
-                        $markdownContent .= "* [{$matches[2]}]({$matches[1]})\n";
-                    } else {
-                        $markdownContent .= "* [{$trimmedLink}]({$trimmedLink})\n";
-                    }
-                }
-            }
-
-            $currentLevel = &$docTree;
-
-            foreach ($pathSegments as $segment) {
-                $fileKey = $this->slug($segment).'.md';
-                if (isset($currentLevel[$fileKey]) && is_string($currentLevel[$fileKey])) {
-                    $fileContent = $currentLevel[$fileKey];
-                    unset($currentLevel[$fileKey]);
-                    $currentLevel[$segment] = ['index.md' => $fileContent];
-                }
-                if (! isset($currentLevel[$segment])) {
-                    $currentLevel[$segment] = [];
-                }
-                $currentLevel = &$currentLevel[$segment];
-            }
-
-            if (isset($currentLevel[$originalPageTitle]) && is_array($currentLevel[$originalPageTitle])) {
-                // This is a directory, so the original becomes the index.
-                // The conflict becomes a sibling page.
-                if ($pageFileName === $baseFileName.'.md') {
-                    $currentLevel[$originalPageTitle]['index.md'] = $markdownContent;
-                } else {
-                    $currentLevel[$pageFileName] = $markdownContent;
-                }
-            } else {
-                $currentLevel[$pageFileName] = $markdownContent;
-            }
-        }
+        // Use the new method to generate the document tree
+        $docTree = $this->generateDocTree($documentationNodes, $registry, $navPathMap, $usedBy);
 
         $fs->deleteDirectory($docsOutputDir);
         $fs->makeDirectory($docsOutputDir, recursive: true);
@@ -329,11 +158,208 @@ class GenerateMKDocsCommand extends Command
         return self::SUCCESS;
     }
 
-    private function getPaths(): array
+    private function generateDocTree(array $documentationNodes, array $registry, array $navPathMap, array $usedBy): array
     {
-        return config('mkdocs.paths', [
-            dirname(__DIR__),
-        ]);
+        $docTree = [];
+        $pathRegistry = [];
+
+        foreach ($documentationNodes as $node) {
+            $pathSegments = array_map('trim', explode('/', $node['navPath']));
+            $originalPageTitle = array_pop($pathSegments);
+            $pageTitle = $originalPageTitle;
+
+            // --- Handle potential conflicts by enumerating file names ---
+            $baseFileName = $this->slug($pageTitle);
+            $pathForConflictCheck = implode('/', array_map($this->slug(...), $pathSegments)).'/'.$baseFileName.'.md';
+
+            if (isset($pathRegistry[$pathForConflictCheck])) {
+                $pathRegistry[$pathForConflictCheck]['count']++;
+                $count = $pathRegistry[$pathForConflictCheck]['count'];
+                $pageTitle .= " ({$count})"; // Update display title
+                $pageFileName = $baseFileName."-({$count}).md"; // Update file name
+
+                $originalNodeInfo = $pathRegistry[$pathForConflictCheck]['nodes'][0];
+                // Log conflict information
+
+                $msg = "\n[CONFLICT] Duplicate navigation path '{$node['navPath']}'.\n";
+                $msg .= "  - Original: {$originalNodeInfo['sourceFile']}:{$originalNodeInfo['startLine']} ({$originalNodeInfo['owner']})\n";
+                $msg .= "  - New:      {$node['sourceFile']}:{$node['startLine']} ({$node['owner']})\n";
+                $msg .= "  - Action:   Creating enumerated page '{$pageTitle}'.\n";
+                $this->components->warn($msg);
+
+                $pathRegistry[$pathForConflictCheck]['nodes'][] = $node;
+            } else {
+                $pageFileName = $baseFileName.'.md';
+                $pathRegistry[$pathForConflictCheck] = [
+                    'count' => 1,
+                    'nodes' => [$node],
+                ];
+            }
+
+            $markdownContent = $this->generateMarkdownContent($node, $pageTitle, $registry, $navPathMap, $usedBy);
+
+            // Build the path in the document tree
+            $this->addToDocTree($docTree, $pathSegments, $originalPageTitle, $pageFileName, $markdownContent);
+        }
+
+        return $docTree;
+    }
+
+    private function addToDocTree(array &$docTree, array $pathSegments, string $originalPageTitle, string $pageFileName, string $markdownContent): void
+    {
+        $currentLevel = &$docTree;
+
+        foreach ($pathSegments as $segment) {
+            $fileKey = $this->slug($segment).'.md';
+
+            // Initialize segment if it doesn't exist
+            if (! isset($currentLevel[$segment])) {
+                $currentLevel[$segment] = [];
+            } elseif (isset($currentLevel[$fileKey]) && is_string($currentLevel[$fileKey])) {
+                // If we have a file with the same name as a directory we need to create
+                $fileContent = $currentLevel[$fileKey];
+                unset($currentLevel[$fileKey]);
+                $currentLevel[$segment] = ['index.md' => $fileContent];
+            }
+
+            $currentLevel = &$currentLevel[$segment];
+        }
+
+        // Now handle adding the actual page
+        if (isset($currentLevel[$originalPageTitle]) && is_array($currentLevel[$originalPageTitle])) {
+            // This is a directory, so the original becomes the index
+            if ($pageFileName === $this->slug($originalPageTitle).'.md') {
+                $currentLevel[$originalPageTitle]['index.md'] = $markdownContent;
+            } else {
+                $currentLevel[$pageFileName] = $markdownContent;
+            }
+        } else {
+            $currentLevel[$pageFileName] = $markdownContent;
+        }
+    }
+
+    private function generateMarkdownContent(array $node, string $pageTitle, array $registry, array $navPathMap, array $usedBy): string
+    {
+        $markdownContent = "# {$pageTitle}\n\n";
+        $markdownContent .= "Source: `{$node['owner']}`\n{:.page-subtitle}\n\n";
+        $markdownContent .= $node['description'];
+
+        // --- Add "Building Blocks Used" section ---
+        if (! empty($node['uses'])) {
+            $markdownContent .= $this->generateUsedComponentsSection($node, $registry, $navPathMap);
+        }
+
+        // --- Add "Used By Building Blocks" section ---
+        $ownerKey = $node['owner'];
+        if (isset($usedBy[$ownerKey])) {
+            $markdownContent .= $this->generateUsedBySection($ownerKey, $usedBy, $registry, $navPathMap);
+        }
+
+        // Add "Further reading" section
+        if (! empty($node['links'])) {
+            $markdownContent .= "\n\n## Further reading\n\n";
+            foreach ($node['links'] as $link) {
+                $trimmedLink = trim($link);
+                if (preg_match('/^\[.*\]\s*\(.*\)$/', $trimmedLink)) {
+                    $markdownContent .= "* {$trimmedLink}\n";
+                } elseif (preg_match('/^(\S+)\s+(.*)$/', $trimmedLink, $matches)) {
+                    $markdownContent .= "* [{$matches[2]}]({$matches[1]})\n";
+                } else {
+                    $markdownContent .= "* [{$trimmedLink}]({$trimmedLink})\n";
+                }
+            }
+        }
+
+        return $markdownContent;
+    }
+
+    private function generateUsedComponentsSection(array $node, array $registry, array $navPathMap): string
+    {
+        $content = "\n\n## Building Blocks Used\n\n";
+        $content .= "This functionality is composed of the following reusable components:\n\n";
+
+        $mermaidLinks = [];
+        $mermaidContent = "graph LR\n";
+        $ownerId = $this->slug($node['owner']);
+        $ownerNavPath = $navPathMap[$node['owner']] ?? '';
+        $mermaidContent .= "    {$ownerId}[\"{$ownerNavPath}\"];\n";
+
+        $sourcePath = $registry[$node['owner']] ?? '';
+
+        foreach ($node['uses'] as $used) {
+            $usedRaw = trim($used);
+            $lookupKey = ltrim($usedRaw, '\\');
+            $usedId = $this->slug($usedRaw);
+            $usedNavPath = $navPathMap[$lookupKey] ?? $usedRaw;
+
+            if (isset($registry[$lookupKey])) {
+                $targetPath = $registry[$lookupKey];
+                $relativeFilePath = $this->makeRelativePath($targetPath, $sourcePath);
+                $relativeUrl = $this->toCleanUrl($relativeFilePath);
+
+                $content .= "* [{$usedNavPath}]({$relativeUrl})\n";
+                $mermaidContent .= "    {$ownerId} --> {$usedId}[\"{$usedNavPath}\"];\n";
+                $mermaidLinks[] = "click {$usedId} \"{$relativeUrl}\" \"View documentation for {$usedRaw}\"";
+            } else {
+                $content .= "* {$usedNavPath} (Not documented)\n";
+                $mermaidContent .= "    {$ownerId} --> {$usedId}[\"{$usedNavPath}\"];\n";
+            }
+        }
+
+        $content .= "\n\n### Composition Graph\n\n";
+        $content .= "```mermaid\n";
+        $content .= $mermaidContent;
+        $content .= "    style {$ownerId} fill:#ffe7cd,stroke:#b38000,stroke-width:4px\n";
+        if (! empty($mermaidLinks)) {
+            $content .= '    '.implode("\n    ", $mermaidLinks)."\n";
+        }
+        $content .= "```\n";
+
+        return $content;
+    }
+
+    private function generateUsedBySection(string $ownerKey, array $usedBy, array $registry, array $navPathMap): string
+    {
+        $content = "\n\n## Used By Building Blocks\n\n";
+        $content .= "This component is a building block for the following functionalities:\n\n";
+
+        $mermaidLinks = [];
+        $mermaidContent = "graph LR\n";
+        $ownerId = $this->slug($ownerKey);
+        $ownerNavPath = $navPathMap[$ownerKey] ?? $ownerKey;
+        $mermaidContent .= "    {$ownerId}[\"{$ownerNavPath}\"];\n";
+
+        $sourcePath = $registry[$ownerKey] ?? '';
+
+        foreach ($usedBy[$ownerKey] as $user) {
+            $userKey = ltrim(trim($user), '\\');
+            $userId = $this->slug($userKey);
+            $userNavPath = $navPathMap[$userKey] ?? $userKey;
+
+            if (isset($registry[$userKey])) {
+                $targetPath = $registry[$userKey];
+                $relativeFilePath = $this->makeRelativePath($targetPath, $sourcePath);
+                $relativeUrl = $this->toCleanUrl($relativeFilePath);
+
+                $content .= "* [{$userNavPath}]({$relativeUrl})\n";
+                $mermaidContent .= "    {$userId}[\"{$userNavPath}\"] --> {$ownerId};\n";
+                $mermaidLinks[] = "click {$userId} \"{$relativeUrl}\" \"View documentation for {$user}\"";
+            } else {
+                $content .= "* {$userNavPath} (Not documented)\n";
+                $mermaidContent .= "    {$userId}[\"{$userNavPath}\"] --> {$ownerId};\n";
+            }
+        }
+
+        $content .= "\n\n### Dependency Graph\n\n";
+        $content .= "```mermaid\n";
+        $content .= $mermaidContent;
+        $content .= "    style {$ownerId} fill:#ffe7cd,stroke:#b38000,stroke-width:4px\n";
+        if (! empty($mermaidLinks)) {
+            $content .= '    '.implode("\n    ", $mermaidLinks)."\n";
+        }
+        $content .= "```\n";
+
+        return $content;
     }
 
     private function slug(string $seg): string

@@ -2,18 +2,12 @@
 
 it('generate config and docs', function () {
     $fs = new Illuminate\Filesystem\Filesystem;
-    $expectedFolder = fixture('mkdocs/expected');
+    $expectedFolder = dirname(__DIR__, 2).'/mkdocs';
     $actualFolder = fixture('mkdocs/actual');
     $fs->deleteDirectory($actualFolder);
-    $path = $fs->exists($expectedFolder.'/mkdocs.yml') ? $actualFolder : $expectedFolder;
+    $path = $actualFolder;
 
-    config(['mkdocs.paths' => [dirname(__DIR__, 2).'/src']]);
-
-    $this->artisan('mkdocs:generate', ['path' => $path])->assertExitCode(0);
-
-    if (! $fs->exists($actualFolder.'/mkdocs.yml')) {
-        $this->markTestSkipped('Tests did only generated the expected files, not the actual ones.');
-    }
+    $this->artisan('mkdocs:generate', ['--path' => $path])->assertExitCode(0);
 
     expect($fs->get($actualFolder.'/mkdocs.yml'))->toEqual($fs->get($expectedFolder.'/mkdocs.yml'));
 

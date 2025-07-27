@@ -7,4 +7,3 @@ coverage
 .phpunit.result.cache
 /.idea
 .php-cs-fixer.cache
-tests/fixtures/mkdocs/actual

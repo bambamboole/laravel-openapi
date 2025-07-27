@@ -29,7 +29,7 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
      * Called when the traverser enters a node.
      * We use this to track the current class context and find doc comments.
      */
-    public function enterNode(Node $node): void
+    public function enterNode(Node $node): null
     {
         if ($node instanceof Node\Stmt\Namespace_) {
             $this->currentNamespace = $node->name ? $node->name->toString() : null;
@@ -50,13 +50,15 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
                 $this->foundDocs[] = $parsedDoc;
             }
         }
+
+        return null;
     }
 
     /**
      * Called when the traverser leaves a node.
      * We use this to reset the class context.
      */
-    public function leaveNode(Node $node): void
+    public function leaveNode(Node $node): null
     {
         if ($node instanceof Node\Stmt\Class_) {
             $this->currentClassName = null;
@@ -64,6 +66,8 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
         if ($node instanceof Node\Stmt\Namespace_) {
             $this->currentNamespace = null;
         }
+
+        return null;
     }
 
     /**
@@ -237,10 +241,10 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
         if ($node instanceof Node\Stmt\Class_ && $node->name) {
             return $node->name->toString();
         }
-        if ($node instanceof ClassMethod && $this->currentClassName && $node->name) {
+        if ($node instanceof ClassMethod && $this->currentClassName) {
             return $this->currentClassName.'::'.$node->name->toString();
         }
-        if ($node instanceof Function_ && $node->name) {
+        if ($node instanceof Function_) {
             return $node->name->toString();
         }
 

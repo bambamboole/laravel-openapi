@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Process;
 
 class ServeMKDocsCommand extends Command
 {
-    protected $signature = 'mkdocs:serve {path? : The base path for the docs output directory}';
+    protected $signature = 'mkdocs:serve {--path : The base path for the docs output directory}';
 
     protected bool $shouldKeepRunning = true;
 
@@ -15,11 +15,14 @@ class ServeMKDocsCommand extends Command
 
     public function handle(): int
     {
-        $this->trap([SIGTERM, SIGQUIT], fn (int $signal) => ($this->shouldKeepRunning = false) && ($this->receivedSignal = $signal));
+        $this->trap([SIGTERM, SIGQUIT], function (int $signal) {
+            $this->receivedSignal = $signal;
+            $this->shouldKeepRunning = false;
+            $this->info('Stopping MKDocs server...');
+        });
 
-        $docsBaseDir = $this->hasArgument('path') ? $this->argument('path') : config('mkdocs.output');
-
-        $this->call('mkdocs:generate', ['path' => $docsBaseDir]);
+        $docsBaseDir = $this->option('path') ?: config('mkdocs.output');
+        $this->call('mkdocs:generate', ['--path' => $docsBaseDir]);
 
         // Note: The command below is commented out because it does not work as expected in the current context.
         // $cmd = "docker run --rm -it -p 9090:8000 -v {$docsBaseDir}:/docs squidfunk/mkdocs-material serve";
@@ -52,7 +55,6 @@ class ServeMKDocsCommand extends Command
             sleep(1);
         }
         if ($process->running()) {
-            $this->info('Stopping MKDocs server...');
             $process->stop();
         }
 
