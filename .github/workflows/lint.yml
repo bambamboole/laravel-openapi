@@ -18,6 +18,8 @@ jobs:
         run: composer install
       - name: Run laravel pint
         run: composer lint
+      - name: Run rector
+        run: composer rector
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: Apply pint changes

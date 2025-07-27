@@ -48,7 +48,7 @@ class QueryFilter extends Parameter
                 default => new Schema(type: $type, example: $example, enum: $enum),
             };
             $name = $filterType === FilterType::EXACT ? $name : $name.'.'.$filterType->value;
-            $description = $description ?? $name.' Filter';
+            $description ??= $name.' Filter';
         }
 
         parent::__construct([

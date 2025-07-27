@@ -52,13 +52,11 @@ class FilterParameter extends Parameter
                 enum: $filters->pluck('name')->unique()->all(),
             );
 
-        $filterAvailableOperatorDescription = $filters->map(function (FilterProperty $filter) {
-            return sprintf(
-                '`%s`: %s',
-                $filter->name,
-                collect($filter->operators)->map(fn ($op) => '*'.$op->value.'*')->implode(', ')
-            );
-        })->implode(" \n\n");
+        $filterAvailableOperatorDescription = $filters->map(fn (FilterProperty $filter) => sprintf(
+            '`%s`: %s',
+            $filter->name,
+            collect($filter->operators)->map(fn ($op) => '*'.$op->value.'*')->implode(', ')
+        ))->implode(" \n\n");
 
         $schema = new Schema(
             type: 'array',

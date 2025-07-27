@@ -25,12 +25,10 @@ class QueryBuilderRequest extends \Spatie\QueryBuilder\QueryBuilderRequest
         }
 
         try {
-            return collect($filterParts)->mapWithKeys(function ($value) {
-                return [$value['key'] => [
-                    'operator' => $value['op'],
-                    'value' => $this->getFilterValue($value['value']),
-                ]];
-            });
+            return collect($filterParts)->mapWithKeys(fn ($value) => [$value['key'] => [
+                'operator' => $value['op'],
+                'value' => $this->getFilterValue($value['value']),
+            ]]);
         } catch (\Throwable) {
             throw ValidationException::withMessages(['filter' => 'Invalid filter format.']);
         }

@@ -13,9 +13,7 @@ class OpenApiServiceProvider extends ServiceProvider
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'openapi');
         $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
 
-        $this->app->bind(QueryBuilderRequest::class, function ($app) {
-            return QueryBuilderRequest::fromRequest($app['request']);
-        });
+        $this->app->bind(QueryBuilderRequest::class, fn ($app) => QueryBuilderRequest::fromRequest($app['request']));
     }
 
     public function register()
