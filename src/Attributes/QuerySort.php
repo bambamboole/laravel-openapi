@@ -31,7 +31,7 @@ class QuerySort extends Parameter
             $enum[] = '-'.$property;
         }
 
-        $description = $description ?? implode('', [
+        $description ??= implode('', [
             'Sort via ',
             collect($enum)->join(', ', ' and '),
             '. Default sort is ',

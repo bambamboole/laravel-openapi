@@ -8,12 +8,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class MkDocsGenerator
 {
-    private Filesystem $filesystem;
-
-    public function __construct(Filesystem $filesystem)
-    {
-        $this->filesystem = $filesystem;
-    }
+    public function __construct(private readonly Filesystem $filesystem) {}
 
     public function generate(array $documentationNodes, string $docsBaseDir): void
     {
@@ -52,7 +47,7 @@ class MkDocsGenerator
     {
         $registry = [];
         foreach ($documentationNodes as $node) {
-            $pathSegments = array_map('trim', explode('/', $node['navPath']));
+            $pathSegments = array_map('trim', explode('/', (string) $node['navPath']));
             $pageTitle = array_pop($pathSegments);
 
             $urlParts = array_map([$this, 'slug'], $pathSegments);
@@ -79,7 +74,7 @@ class MkDocsGenerator
         $usedBy = [];
         foreach ($documentationNodes as $node) {
             foreach ($node['uses'] as $used) {
-                $lookupKey = ltrim(trim($used), '\\');
+                $lookupKey = ltrim(trim((string) $used), '\\');
                 if (! isset($usedBy[$lookupKey])) {
                     $usedBy[$lookupKey] = [];
                 }
@@ -96,7 +91,7 @@ class MkDocsGenerator
         $pathRegistry = [];
 
         foreach ($documentationNodes as $node) {
-            $pathSegments = array_map('trim', explode('/', $node['navPath']));
+            $pathSegments = array_map('trim', explode('/', (string) $node['navPath']));
             $originalPageTitle = array_pop($pathSegments);
             $pageTitle = $originalPageTitle;
 
@@ -245,7 +240,7 @@ class MkDocsGenerator
         $sourcePath = $registry[$node['owner']] ?? '';
 
         foreach ($node['uses'] as $used) {
-            $usedRaw = trim($used);
+            $usedRaw = trim((string) $used);
             $lookupKey = ltrim($usedRaw, '\\');
             $usedId = $this->slug($usedRaw);
             $usedNavPath = $navPathMap[$lookupKey] ?? $usedRaw;
@@ -290,7 +285,7 @@ class MkDocsGenerator
         $sourcePath = $registry[$ownerKey] ?? '';
 
         foreach ($usedBy[$ownerKey] as $user) {
-            $userKey = ltrim(trim($user), '\\');
+            $userKey = ltrim(trim((string) $user), '\\');
             $userId = $this->slug($userKey);
             $userNavPath = $navPathMap[$userKey] ?? $userKey;
 
@@ -324,7 +319,7 @@ class MkDocsGenerator
     {
         $content = "\n\n## Further reading\n\n";
         foreach ($links as $link) {
-            $trimmedLink = trim($link);
+            $trimmedLink = trim((string) $link);
             if (preg_match('/^\[.*\]\s*\(.*\)$/', $trimmedLink)) {
                 $content .= "* {$trimmedLink}\n";
             } elseif (preg_match('/^(\S+)\s+(.*)$/', $trimmedLink, $matches)) {
@@ -390,7 +385,7 @@ class MkDocsGenerator
 
     private function makeRelativePath(string $path, string $base): string
     {
-        if (strpos($path, dirname($base)) === 0) {
+        if (str_starts_with($path, dirname($base))) {
             return './'.substr($path, strlen(dirname($base).'/'));
         }
 
@@ -400,10 +395,10 @@ class MkDocsGenerator
     private function toCleanUrl(string $path): string
     {
         $url = preg_replace('/\.md$/', '', $path);
-        if (basename($url) === 'index') {
-            $url = dirname($url);
+        if (basename((string) $url) === 'index') {
+            $url = dirname((string) $url);
         }
 
-        return ($url === '.' || $url === '') ? '' : rtrim($url, '/').'/';
+        return ($url === '.' || $url === '') ? '' : rtrim((string) $url, '/').'/';
     }
 }

@@ -79,7 +79,7 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
     private function parseDocComment(string $docComment, string $defaultTitle, string $ownerIdentifier, int $startLine): ?array
     {
         // Quickly check if the block is functional at all.
-        if (strpos($docComment, '@functional') === false) {
+        if (! str_contains($docComment, '@functional')) {
             return null;
         }
 
@@ -114,10 +114,10 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
 
         foreach ($lines as $line) {
             $testLine = preg_replace('/^\s*\*\s?/', '', $line);
-            if (str_starts_with(trim($testLine), '@functional')) {
+            if (str_starts_with(trim((string) $testLine), '@functional')) {
                 $inFunctionalBlock = true;
-                $lineContent = preg_replace('/@functional\s*/', '', $testLine, 1);
-                if (trim($lineContent) !== '') {
+                $lineContent = preg_replace('/@functional\s*/', '', (string) $testLine, 1);
+                if (trim((string) $lineContent) !== '') {
                     $rawFunctionalLines[] = $lineContent;
                 }
 
@@ -125,7 +125,7 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
             }
 
             if ($inFunctionalBlock) {
-                if (str_starts_with(trim($testLine), '@')) {
+                if (str_starts_with(trim((string) $testLine), '@')) {
                     break;
                 }
                 $rawFunctionalLines[] = $testLine;
@@ -136,13 +136,13 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
         $minIndent = null;
         $inCodeFence = false;
         foreach ($rawFunctionalLines as $line) {
-            if (str_starts_with(trim($line), '```')) {
+            if (str_starts_with(trim((string) $line), '```')) {
                 $inCodeFence = ! $inCodeFence;
 
                 continue;
             }
-            if (! $inCodeFence && trim($line) !== '') {
-                preg_match('/^(\s*)/', $line, $matches);
+            if (! $inCodeFence && trim((string) $line) !== '') {
+                preg_match('/^(\s*)/', (string) $line, $matches);
                 $currentIndent = strlen($matches[1]);
                 if ($minIndent === null || $currentIndent < $minIndent) {
                     $minIndent = $currentIndent;
@@ -153,13 +153,13 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
         $deindentedLines = [];
         if ($minIndent > 0) {
             foreach ($rawFunctionalLines as $line) {
-                if (trim($line) === '') {
+                if (trim((string) $line) === '') {
                     $deindentedLines[] = $line;
 
                     continue;
                 }
-                if (str_starts_with($line, str_repeat(' ', $minIndent))) {
-                    $deindentedLines[] = substr($line, $minIndent);
+                if (str_starts_with((string) $line, str_repeat(' ', $minIndent))) {
+                    $deindentedLines[] = substr((string) $line, $minIndent);
                 } else {
                     $deindentedLines[] = $line;
                 }
@@ -175,10 +175,10 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
             for ($i = 1; $i < count($deindentedLines); $i++) {
                 $currentLine = $deindentedLines[$i];
                 $previousLine = $deindentedLines[$i - 1];
-                $trimmedCurrent = ltrim($currentLine);
+                $trimmedCurrent = ltrim((string) $currentLine);
                 $isListItem = str_starts_with($trimmedCurrent, '- ') || str_starts_with($trimmedCurrent, '* ') || preg_match('/^\d+\.\s/', $trimmedCurrent);
-                if ($isListItem && trim($previousLine) !== '') {
-                    $trimmedPrevious = ltrim($previousLine);
+                if ($isListItem && trim((string) $previousLine) !== '') {
+                    $trimmedPrevious = ltrim((string) $previousLine);
                     $previousIsListItem = str_starts_with($trimmedPrevious, '- ') || str_starts_with($trimmedPrevious, '* ') || preg_match('/^\d+\.\s/', $trimmedPrevious);
                     if (! $previousIsListItem) {
                         $listFixedLines[] = '';
@@ -191,7 +191,7 @@ class FunctionalDocBlockExtractor extends NodeVisitorAbstract
         // --- Pass 5: Demote all user-defined headings by one level ---
         $finalLines = [];
         foreach ($listFixedLines as $line) {
-            $trimmedLine = ltrim($line);
+            $trimmedLine = ltrim((string) $line);
             if (str_starts_with($trimmedLine, '#')) {
                 $finalLines[] = '#'.$trimmedLine;
             } else {
