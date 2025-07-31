@@ -78,8 +78,24 @@ class GenerateMKDocsCommand extends Command
         $this->components->info('MKDocs configuration generated successfully.');
         $this->components->info('Documentation files generated successfully.');
 
+        $cmd = config('mkdocs.commands.build', 'docker run --rm -v {path}:/docs squidfunk/mkdocs-material build');
+        if (is_array($cmd)) {
+            $cmd = array_map(fn (string $part) => str_replace('{path}', $docsBaseDir, $part), $cmd);
+        }
+        $cmd = is_array($cmd)
+            ? array_map(fn (string $part) => str_replace('{path}', $docsBaseDir, $part), $cmd)
+            : str_replace('{path}', $docsBaseDir, $cmd);
+
         // Build using Docker
-        Process::run("docker run --rm -v {$docsBaseDir}:/docs squidfunk/mkdocs-material build");
+        $result = Process::run($cmd, function ($type, $output) {
+            $this->components->info($output);
+        });
+        if (! $result->successful()) {
+            $this->components->error('MKDocs build failed. Please check the output for details.');
+
+            return self::FAILURE;
+        }
+        $this->components->info('MKDocs files generated successfully.');
 
         return self::SUCCESS;
     }

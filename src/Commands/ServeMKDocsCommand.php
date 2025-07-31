@@ -25,21 +25,24 @@ class ServeMKDocsCommand extends Command
         $this->call('mkdocs:generate', ['--path' => $docsBaseDir]);
 
         $port = $this->option('port');
-        // Note: The command below is commented out because it does not work as expected in the current context.
-        // $cmd = "docker run --rm -it -p 9090:8000 -v {$docsBaseDir}:/docs squidfunk/mkdocs-material serve";
-        $cmd = [
+        $cmd = config('mkdocs.commands.serve', [
             'docker', 'run', '--rm', '-it',
-            '-p', $port.':'.$port,
-            '-v', "{$docsBaseDir}:/docs",
+            '-p', '{port}:{port}',
+            '-v', '{path}:/docs',
             '-e', 'ADD_MODULES=mkdocs-material pymdown-extensions',
             '-e', 'LIVE_RELOAD_SUPPORT=true',
             '-e', 'FAST_MODE=true',
             '-e', 'DOCS_DIRECTORY=/docs',
             '-e', 'AUTO_UPDATE=true',
             '-e', 'UPDATE_INTERVAL=1',
-            '-e', 'DEV_ADDR=0.0.0.0:'.$port,
+            '-e', 'DEV_ADDR=0.0.0.0:{port}',
             'polinux/mkdocs',
-        ];
+        ]);
+        if (is_array($cmd)) {
+            $cmd = array_map(fn (string $part) => str_replace(['{path}', '{port}'], [$docsBaseDir, $port], $part), $cmd);
+        } else {
+            $cmd = str_replace(['{path}', '{port}'], [$docsBaseDir, $port], $cmd);
+        }
 
         $process = Process::tty()
             ->timeout(0)
