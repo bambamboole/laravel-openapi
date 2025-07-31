@@ -14,7 +14,7 @@ servers:
 paths:
   /api/v1/test-models:
     get:
-      description: 'List test resources'
+      description: "This endpoint is only available if the feature flag `beta-users` is enabled.\n\nList test resources"
       operationId: 'GET::api-v1-test-models'
       parameters:
         -

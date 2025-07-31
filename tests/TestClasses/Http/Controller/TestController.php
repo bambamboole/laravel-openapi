@@ -36,6 +36,7 @@ class TestController
             ]),
         ],
         maxPageSize: 1337,
+        featureFlag: 'beta-users',
     )]
     public function index(): AnonymousResourceCollection
     {

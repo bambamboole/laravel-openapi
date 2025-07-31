@@ -52,7 +52,7 @@ trait HasEndpointHelpers
         if ($featureFlag instanceof \BackedEnum) {
             $featureFlag = $featureFlag->value;
         }
-        $featureFlagNote = "This endpoint is only available if the feature flag `{$featureFlag}` is enabled.\n";
+        $featureFlagNote = "This endpoint is only available if the feature flag `{$featureFlag}` is enabled.\n\n";
 
         return $featureFlagNote.($description ?? '');
     }
