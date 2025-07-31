@@ -26,6 +26,7 @@ class PatchEndpoint extends Patch
         ?string $operationId = null,
         bool $isInternal = false,
         ?\DateTimeInterface $deprecated = null,
+        \BackedEnum|string|null $featureFlag = null,
     ) {
         $responses = [
             $this->response('200', $description, [
@@ -44,7 +45,7 @@ class PatchEndpoint extends Patch
         parent::__construct([
             'path' => $path,
             'operationId' => $operationId ?? Generator::UNDEFINED,
-            'description' => $description ?? Generator::UNDEFINED,
+            'description' => $this->modifyDescription($description, $featureFlag),
             'summary' => $summary ?? Generator::UNDEFINED,
             'security' => $security ?? Generator::UNDEFINED,
             'servers' => Generator::UNDEFINED,

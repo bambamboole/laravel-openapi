@@ -40,4 +40,20 @@ trait HasEndpointHelpers
 
         return empty($x) ? Generator::UNDEFINED : $x;
     }
+
+    protected function modifyDescription(?string $description, \BackedEnum|string|null $featureFlag): string
+    {
+        if (! $description && ! $featureFlag) {
+            return Generator::UNDEFINED;
+        }
+        if (! $featureFlag) {
+            return $description ?? Generator::UNDEFINED;
+        }
+        if ($featureFlag instanceof \BackedEnum) {
+            $featureFlag = $featureFlag->value;
+        }
+        $featureFlagNote = "This endpoint is only available if the feature flag `{$featureFlag}` is enabled.\n";
+
+        return $featureFlagNote.($description ?? '');
+    }
 }

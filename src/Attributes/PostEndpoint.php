@@ -29,6 +29,7 @@ class PostEndpoint extends Post
         string $contentType = 'application/json',
         bool $isInternal = false,
         ?\DateTimeInterface $deprecated = null,
+        \BackedEnum|string|null $featureFlag = null,
     ) {
         $responses = [
             $this->response($successStatus, $description, [
@@ -47,7 +48,7 @@ class PostEndpoint extends Post
         parent::__construct([
             'path' => $path,
             'operationId' => $operationId ?? Generator::UNDEFINED,
-            'description' => $description ?? Generator::UNDEFINED,
+            'description' => $this->modifyDescription($description, $featureFlag),
             'summary' => $summary ?? Generator::UNDEFINED,
             'security' => $security ?? Generator::UNDEFINED,
             'servers' => Generator::UNDEFINED,
