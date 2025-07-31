@@ -52,7 +52,7 @@ class PutEndpoint extends Put
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
-            'x' => $this->parseX($isInternal, $deprecated),
+            'x' => $this->compileX($isInternal, $deprecated),
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }

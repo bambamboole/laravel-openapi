@@ -28,7 +28,7 @@ trait HasEndpointHelpers
         return new Response(response: '404', description: 'Not Found');
     }
 
-    protected function parseX(bool $isInternal, ?\DateTimeInterface $deprecated): string|array
+    protected function compileX(bool $isInternal, ?\DateTimeInterface $deprecated): string|array
     {
         $x = [];
         if ($isInternal) {

@@ -45,7 +45,7 @@ class DeleteEndpoint extends Delete
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
-            'x' => $this->parseX($isInternal, $deprecated),
+            'x' => $this->compileX($isInternal, $deprecated),
             'value' => $this->combine($responses, $parameters),
         ]);
     }
