@@ -2,6 +2,7 @@
 
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
+use Illuminate\Support\Arr;
 use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Response;
 use OpenApi\Generator;
@@ -28,8 +29,12 @@ trait HasEndpointHelpers
         return new Response(response: '404', description: 'Not Found');
     }
 
-    protected function compileX(bool $isInternal, ?\DateTimeInterface $deprecated, \BackedEnum|string|null $featureFlag): string|array
-    {
+    protected function compileX(
+        bool $isInternal,
+        ?\DateTimeInterface $deprecated,
+        \BackedEnum|string|null $featureFlag,
+        string|array|null $scopes = null,
+    ): string|array {
         $x = [];
         if ($isInternal) {
             $x['internal'] = true;
@@ -42,6 +47,9 @@ trait HasEndpointHelpers
                 $featureFlag = $featureFlag->value;
             }
             $x['feature_flag'] = $featureFlag;
+        }
+        if ($scopes) {
+            $x['scopes'] = Arr::wrap($scopes);
         }
 
         return empty($x) ? Generator::UNDEFINED : $x;

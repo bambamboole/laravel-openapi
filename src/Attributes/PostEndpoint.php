@@ -30,6 +30,7 @@ class PostEndpoint extends Post
         bool $isInternal = false,
         ?\DateTimeInterface $deprecated = null,
         \BackedEnum|string|null $featureFlag = null,
+        string|array|null $scopes = null,
     ) {
         $responses = [
             $this->response($successStatus, $description, [
@@ -55,7 +56,7 @@ class PostEndpoint extends Post
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
-            'x' => $this->compileX($isInternal, $deprecated, $featureFlag),
+            'x' => $this->compileX($isInternal, $deprecated, $featureFlag, $scopes),
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }

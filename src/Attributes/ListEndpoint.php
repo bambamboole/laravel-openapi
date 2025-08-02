@@ -31,6 +31,7 @@ class ListEndpoint extends Get
         bool $isInternal = false,
         ?\DateTimeInterface $deprecated = null,
         \BackedEnum|string|null $featureFlag = null,
+        string|array|null $scopes = null,
     ) {
         $responses = [
             $this->response('200', $description, [
@@ -59,7 +60,7 @@ class ListEndpoint extends Get
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
-            'x' => $this->compileX($isInternal, $deprecated, $featureFlag),
+            'x' => $this->compileX($isInternal, $deprecated, $featureFlag, $scopes),
             'value' => $this->combine($responses, $parameters),
         ]);
     }

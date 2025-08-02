@@ -14,7 +14,7 @@ servers:
 paths:
   /api/v1/test-models:
     get:
-      description: "This endpoint is only available if the feature flag `beta-users` is enabled.\n\nList test resources"
+      description: "This endpoint is only available if the feature flag `beta-users` is enabled.\n\nThis endpoint requires the following scopes: `test-models:read`.\n\nList test resources"
       operationId: 'GET::api-v1-test-models'
       parameters:
         -
@@ -81,6 +81,8 @@ paths:
         '403':
           description: Unauthorized
       x-feature_flag: beta-users
+      x-scopes:
+        - 'test-models:read'
     post:
       description: 'update test resource'
       operationId: 'POST::api-v1-test-models'
