@@ -45,14 +45,14 @@ class PatchEndpoint extends Patch
         parent::__construct([
             'path' => $path,
             'operationId' => $operationId ?? Generator::UNDEFINED,
-            'description' => $this->modifyDescription($description, $featureFlag),
+            'description' => $description ?? Generator::UNDEFINED,
             'summary' => $summary ?? Generator::UNDEFINED,
             'security' => $security ?? Generator::UNDEFINED,
             'servers' => Generator::UNDEFINED,
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
-            'x' => $this->compileX($isInternal, $deprecated),
+            'x' => $this->compileX($isInternal, $deprecated, $featureFlag),
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }

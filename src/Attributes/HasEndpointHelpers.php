@@ -28,7 +28,7 @@ trait HasEndpointHelpers
         return new Response(response: '404', description: 'Not Found');
     }
 
-    protected function compileX(bool $isInternal, ?\DateTimeInterface $deprecated): string|array
+    protected function compileX(bool $isInternal, ?\DateTimeInterface $deprecated, \BackedEnum|string|null $featureFlag): string|array
     {
         $x = [];
         if ($isInternal) {
@@ -37,23 +37,13 @@ trait HasEndpointHelpers
         if ($deprecated) {
             $x['deprecated_on'] = $deprecated->format('Y-m-d');
         }
+        if ($featureFlag) {
+            if ($featureFlag instanceof \BackedEnum) {
+                $featureFlag = $featureFlag->value;
+            }
+            $x['feature_flag'] = $featureFlag;
+        }
 
         return empty($x) ? Generator::UNDEFINED : $x;
-    }
-
-    protected function modifyDescription(?string $description, \BackedEnum|string|null $featureFlag): string
-    {
-        if (! $description && ! $featureFlag) {
-            return Generator::UNDEFINED;
-        }
-        if (! $featureFlag) {
-            return $description ?? Generator::UNDEFINED;
-        }
-        if ($featureFlag instanceof \BackedEnum) {
-            $featureFlag = $featureFlag->value;
-        }
-        $featureFlagNote = "This endpoint is only available if the feature flag `{$featureFlag}` is enabled.\n\n";
-
-        return $featureFlagNote.($description ?? '');
     }
 }

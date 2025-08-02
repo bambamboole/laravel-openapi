@@ -15,6 +15,9 @@ return [
                 'enabled' => true,
                 'months_before_removal' => 6,
             ],
+            'feature_flags' => [
+                'description_prefix' => "This endpoint is only available if the feature flag `{flag}` is enabled.\n\n",
+            ],
             'validation_status_code' => 422,
             'name' => 'My API',
             'version' => '1.0.0',

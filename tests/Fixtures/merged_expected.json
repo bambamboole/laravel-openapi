@@ -207,7 +207,8 @@
                     "403": {
                         "description": "Unauthorized"
                     }
-                }
+                },
+                "x-feature_flag": "beta-users"
             },
             "post": {
                 "description": "update test resource",

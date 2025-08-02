@@ -2,6 +2,11 @@
 
 namespace Bambamboole\LaravelOpenApi;
 
+use Bambamboole\LaravelOpenApi\PostProcessors\AddMetaInfoProcessor;
+use Bambamboole\LaravelOpenApi\PostProcessors\FeatureFlagProcessor;
+use Bambamboole\LaravelOpenApi\PostProcessors\FilterDeprecationsProcessor;
+use Bambamboole\LaravelOpenApi\PostProcessors\OperationIdProcessor;
+use Bambamboole\LaravelOpenApi\PostProcessors\SortComponentsProcessor;
 use Illuminate\Support\Arr;
 use OpenApi\Analysers\AttributeAnnotationFactory;
 use OpenApi\Analysers\DocBlockAnnotationFactory;
@@ -19,6 +24,7 @@ class OpenApiGeneratorFactory
         $generator->getProcessorPipeline()->insert(new AddMetaInfoProcessor($config), fn () => 1);
         $generator->getProcessorPipeline()->remove(OperationId::class);
         $generator->getProcessorPipeline()->add(new OperationIdProcessor);
+        $generator->getProcessorPipeline()->add(new FeatureFlagProcessor);
         $generator->getProcessorPipeline()->add(new ValidationResponseStatusCodeProcessor(Arr::get($config, 'validation_status_code', 422)));
         $generator->getProcessorPipeline()->add(new SortComponentsProcessor);
         if (Arr::get($config, 'deprecation_filter.enabled', false)) {

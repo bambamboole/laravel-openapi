@@ -80,6 +80,7 @@ paths:
           description: Unauthorized
         '403':
           description: Unauthorized
+      x-feature_flag: beta-users
     post:
       description: 'update test resource'
       operationId: 'POST::api-v1-test-models'

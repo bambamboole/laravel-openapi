@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Bambamboole\LaravelOpenApi;
+namespace Bambamboole\LaravelOpenApi\PostProcessors;
 
 use OpenApi\Analysis;
 use OpenApi\Attributes\Components;
