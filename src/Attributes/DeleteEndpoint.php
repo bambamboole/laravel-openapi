@@ -27,8 +27,7 @@ class DeleteEndpoint extends Delete
     ) {
         $responses = [
             $this->response('204', 'Resource successfully deleted'),
-            $this->response401(),
-            $this->response403(),
+            ...$this->makeNegativeResponses(with404: true),
         ];
         if (! empty($validates)) {
             $responses[] = AttributeFactory::createValidationResponse($validates);

@@ -2,6 +2,7 @@
 
 namespace Bambamboole\LaravelOpenApi\Tests\TestClasses\Http\Controller;
 
+use Bambamboole\LaravelOpenApi\Attributes\ActionEndpoint;
 use Bambamboole\LaravelOpenApi\Attributes\DeleteEndpoint;
 use Bambamboole\LaravelOpenApi\Attributes\FilterParameter;
 use Bambamboole\LaravelOpenApi\Attributes\GetEndpoint;
@@ -101,6 +102,15 @@ class TestController
         $testModel = TestModel::query()->findOrFail($id);
         $testModel->delete();
 
+        return response()->noContent();
+    }
+
+    #[ActionEndpoint(
+        path: '/api/v1/test-models/{id}/actions/test',
+        description: 'Execute test action on test resource',
+    )]
+    public function testAction(int $id): Response
+    {
         return response()->noContent();
     }
 }

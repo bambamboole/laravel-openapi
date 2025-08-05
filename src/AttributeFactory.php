@@ -99,8 +99,11 @@ class AttributeFactory
         return $params;
     }
 
-    public static function createValidationResponse(string|array $request): Response
+    public static function createValidationResponse(null|string|array $request): ?Response
     {
+        if ($request === null) {
+            return null;
+        }
         try {
             if (is_string($request)) {
                 $validationData = self::extractValidationInfo($request);

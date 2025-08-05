@@ -28,12 +28,8 @@ class GetEndpoint extends Get
         string|array|null $scopes = null,
     ) {
         $responses = [
-            $this->response('200', $description, [
-                new Property('data', ref: $resource),
-            ]),
-            $this->response401(),
-            $this->response403(),
-            $this->response404(),
+            $this->response('200', $description, [new Property('data', ref: $resource)]),
+            ...$this->makeNegativeResponses(with404: true),
         ];
         if (! empty($includes)) {
             $parameters[] = AttributeFactory::createIncludeParameter($includes);

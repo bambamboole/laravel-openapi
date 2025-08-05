@@ -16,8 +16,8 @@ class PatchEndpoint extends Patch
 
     public function __construct(
         string $path,
-        string $request,
-        string $resource,
+        ?string $request = null,
+        ?string $resource = null,
         ?string $description = null,
         ?array $tags = null,
         ?array $security = null,
@@ -30,19 +30,17 @@ class PatchEndpoint extends Patch
         string|array|null $scopes = null,
     ) {
         $responses = [
-            $this->response('200', $description, [
-                new Property('data', ref: $resource),
-            ]),
-            AttributeFactory::createValidationResponse($request),
-            $this->response401(),
-            $this->response403(),
+            $resource
+                ? $this->response('200', $description, [new Property('data', ref: $resource)])
+                : $this->response204(),
+            ...$this->makeNegativeResponses($request),
         ];
 
         $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
 
-        $requestBody = new RequestBody(
-            content: new JsonContent(ref: $request),
-        );
+        $requestBody = $request
+            ? new RequestBody(content: new JsonContent(ref: $request))
+            : null;
         parent::__construct([
             'path' => $path,
             'operationId' => $operationId ?? Generator::UNDEFINED,

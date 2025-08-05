@@ -38,8 +38,7 @@ class ListEndpoint extends Get
                 new Property('data', type: 'array', items: new Items(ref: $resource)),
                 ...$this->getPaginationProperties($paginationType),
             ]),
-            $this->response401(),
-            $this->response403(),
+            ...$this->makeNegativeResponses(),
         ];
         $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
         if (! empty($filters)) {
