@@ -17,8 +17,8 @@ class PostEndpoint extends Post
 
     public function __construct(
         string $path,
-        string $request,
-        string $resource,
+        ?string $request = null,
+        ?string $resource = null,
         ?string $description = null,
         ?array $tags = null,
         ?array $security = null,
@@ -32,20 +32,19 @@ class PostEndpoint extends Post
         \BackedEnum|string|null $featureFlag = null,
         string|array|null $scopes = null,
     ) {
+
         $responses = [
-            $this->response($successStatus, $description, [
-                new Property('data', ref: $resource),
-            ]),
-            AttributeFactory::createValidationResponse($request),
-            $this->response401(),
-            $this->response403(),
+            $resource
+                ? $this->response($successStatus, $description, [new Property('data', ref: $resource)])
+                : $this->response204(),
+            ...$this->makeNegativeResponses($request),
         ];
 
         $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
 
-        $requestBody = new RequestBody(
-            content: new MediaType($contentType, schema: new Schema(ref: $request))
-        );
+        $requestBody = $request
+            ? new RequestBody(content: new MediaType($contentType, schema: new Schema(ref: $request)))
+            : null;
         parent::__construct([
             'path' => $path,
             'operationId' => $operationId ?? Generator::UNDEFINED,
