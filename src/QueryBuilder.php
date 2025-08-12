@@ -2,6 +2,7 @@
 
 namespace Bambamboole\LaravelOpenApi;
 
+use Bambamboole\LaravelOpenApi\Http\Filters\QueryBuilderFilterCollection;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -27,5 +28,15 @@ class QueryBuilder extends \Spatie\QueryBuilder\QueryBuilder
     public function getRequest(): QueryBuilderRequest
     {
         return $this->request;
+    }
+
+    public function allowedFilters($filters): static
+    {
+        $filters = collect(is_array($filters) ? $filters : func_get_args())
+            ->map(fn ($filter) => $filter instanceof QueryBuilderFilterCollection ? $filter->getFilters() : $filter)
+            ->flatten(1)
+            ->toArray();
+
+        return parent::allowedFilters($filters);
     }
 }

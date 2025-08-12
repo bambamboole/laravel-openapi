@@ -48,8 +48,7 @@ class TestController
                     QueryFilter::identifier(),
                     QueryFilter::string('name'),
                     QueryFilter::string('status'),
-                    QueryFilter::date('updated_at'),
-                    QueryFilter::date('created_at'),
+                    new FilterCollection,
                 )
                 ->get()
         );
