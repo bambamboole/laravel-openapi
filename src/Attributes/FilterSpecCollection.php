@@ -2,7 +2,7 @@
 
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
-interface FilterPropertyCollection
+interface FilterSpecCollection
 {
-    public function getFilterProperties(): array;
+    public function getFilterSpecification(): array;
 }

@@ -468,7 +468,7 @@ You can configure the web interface in the `docs` section of the configuration f
 ### Reusing filters
 
 It can be very useful to reuse filters across multiple endpoints. This can be done by creating a new Attribute class
-that implements the `FilterPropertyCollection` interface. Here's an example:
+that implements the `FilterSpecCollection` interface. Here's an example:
 
 ```php
 <?php
@@ -476,13 +476,13 @@ that implements the `FilterPropertyCollection` interface. Here's an example:
 namespace App\OpenApi\Filters;
 
 use Bambamboole\LaravelOpenApi\Attributes\FilterProperty;
-use Bambamboole\LaravelOpenApi\Attributes\FilterPropertyCollection;
+use Bambamboole\LaravelOpenApi\Attributes\FilterSpecCollection;
 use Bambamboole\LaravelOpenApi\Enum\FilterType;
 
 #[\Attribute(\Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
-class UserFilters implements FilterPropertyCollection
+class UserFilters implements FilterSpecCollection
 {
-    public function getFilterProperties(): array
+    public function getFilterSpecification(): array
     {
         return [
             new FilterProperty(

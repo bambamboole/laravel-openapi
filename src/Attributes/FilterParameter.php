@@ -29,7 +29,7 @@ class FilterParameter extends Parameter
         bool $withCustom = false,
     ) {
         $filters = collect($filters)
-            ->flatMap(fn (mixed $f) => $f instanceof FilterPropertyCollection ? $f->getFilterProperties() : Arr::wrap($f))
+            ->flatMap(fn (mixed $f) => $f instanceof FilterSpecCollection ? $f->getFilterSpecification() : Arr::wrap($f))
             ->flatten(1);
 
         $key = $withCustom
