@@ -2,7 +2,6 @@
 
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
-use Bambamboole\LaravelOpenApi\AttributeFactory;
 use OpenApi\Annotations\Get;
 use OpenApi\Attributes\Property;
 use OpenApi\Generator;
@@ -31,11 +30,8 @@ class GetEndpoint extends Get
             $this->response('200', $description, [new Property('data', ref: $resource)]),
             ...$this->makeNegativeResponses(with404: true),
         ];
-        if (! empty($includes)) {
-            $parameters[] = AttributeFactory::createIncludeParameter($includes);
-        }
 
-        $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
+        $parameters = $this->makeParameters($parameters, $path, includes: $includes);
 
         parent::__construct([
             'path' => $path,

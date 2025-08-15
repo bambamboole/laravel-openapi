@@ -33,7 +33,7 @@ class DeleteEndpoint extends Delete
             $responses[] = AttributeFactory::createValidationResponse($validates);
         }
 
-        $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
+        $parameters = $this->makeParameters($parameters, $path);
 
         parent::__construct([
             'path' => $path,

@@ -2,11 +2,8 @@
 
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
-use Bambamboole\LaravelOpenApi\AttributeFactory;
 use OpenApi\Annotations\Patch;
-use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Property;
-use OpenApi\Attributes\RequestBody;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
@@ -36,11 +33,9 @@ class PatchEndpoint extends Patch
             ...$this->makeNegativeResponses($request),
         ];
 
-        $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
+        $parameters = $this->makeParameters($parameters, $path);
+        $requestBody = $this->makeRequestBody($request);
 
-        $requestBody = $request
-            ? new RequestBody(content: new JsonContent(ref: $request))
-            : null;
         parent::__construct([
             'path' => $path,
             'operationId' => $operationId ?? Generator::UNDEFINED,
@@ -51,7 +46,7 @@ class PatchEndpoint extends Patch
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
-            'x' => $this->compileX($isInternal, $deprecated, $featureFlag, $scopes),
+            'x' => $this->compileX($isInternal, $deprecated, $featureFlag, $scopes, $request),
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }

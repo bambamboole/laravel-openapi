@@ -2,12 +2,8 @@
 
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
-use Bambamboole\LaravelOpenApi\AttributeFactory;
 use OpenApi\Annotations\Post;
-use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\Property;
-use OpenApi\Attributes\RequestBody;
-use OpenApi\Attributes\Schema;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
@@ -26,13 +22,11 @@ class PostEndpoint extends Post
         ?array $parameters = [],
         ?string $operationId = null,
         string $successStatus = '200',
-        string $contentType = 'application/json',
         bool $isInternal = false,
         ?\DateTimeInterface $deprecated = null,
         \BackedEnum|string|null $featureFlag = null,
         string|array|null $scopes = null,
     ) {
-
         $responses = [
             $resource
                 ? $this->response($successStatus, $description, [new Property('data', ref: $resource)])
@@ -40,11 +34,10 @@ class PostEndpoint extends Post
             ...$this->makeNegativeResponses($request),
         ];
 
-        $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
+        $parameters = $this->makeParameters($parameters, $path);
 
-        $requestBody = $request
-            ? new RequestBody(content: new MediaType($contentType, schema: new Schema(ref: $request)))
-            : null;
+        $requestBody = $this->makeRequestBody($request);
+
         parent::__construct([
             'path' => $path,
             'operationId' => $operationId ?? Generator::UNDEFINED,
@@ -55,7 +48,7 @@ class PostEndpoint extends Post
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
-            'x' => $this->compileX($isInternal, $deprecated, $featureFlag, $scopes),
+            'x' => $this->compileX($isInternal, $deprecated, $featureFlag, $scopes, $request),
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }
