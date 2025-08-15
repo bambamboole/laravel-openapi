@@ -2,11 +2,8 @@
 
 namespace Bambamboole\LaravelOpenApi\Attributes;
 
-use Bambamboole\LaravelOpenApi\AttributeFactory;
 use OpenApi\Annotations\Put;
-use OpenApi\Attributes\JsonContent;
 use OpenApi\Attributes\Property;
-use OpenApi\Attributes\RequestBody;
 use OpenApi\Generator;
 
 #[\Attribute(\Attribute::TARGET_CLASS | \Attribute::TARGET_METHOD)]
@@ -16,8 +13,8 @@ class PutEndpoint extends Put
 
     public function __construct(
         string $path,
-        string $request,
-        string $resource,
+        ?string $request = null,
+        ?string $resource = null,
         ?string $description = null,
         ?array $tags = null,
         ?array $security = null,
@@ -30,19 +27,16 @@ class PutEndpoint extends Put
         string|array|null $scopes = null,
     ) {
         $responses = [
-            $this->response('200', $description, [
-                new Property('data', ref: $resource),
-            ]),
-            AttributeFactory::createValidationResponse($request),
-            $this->response401(),
-            $this->response403(),
+            $resource
+                ? $this->response('200', $description, [new Property('data', ref: $resource)])
+                : $this->response204(),
+            ...$this->makeNegativeResponses($request),
         ];
 
-        $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
+        $parameters = $this->makeParameters($parameters, $path);
 
-        $requestBody = new RequestBody(
-            content: new JsonContent(ref: $request),
-        );
+        $requestBody = $this->makeRequestBody($request);
+
         parent::__construct([
             'path' => $path,
             'operationId' => $operationId ?? Generator::UNDEFINED,
@@ -53,7 +47,7 @@ class PutEndpoint extends Put
             'tags' => $tags ?? Generator::UNDEFINED,
             'callbacks' => Generator::UNDEFINED,
             'deprecated' => $deprecated !== null ? true : Generator::UNDEFINED,
-            'x' => $this->compileX($isInternal, $deprecated, $featureFlag, $scopes),
+            'x' => $this->compileX($isInternal, $deprecated, $featureFlag, $scopes, $request),
             'value' => $this->combine($requestBody, $responses, $parameters),
         ]);
     }

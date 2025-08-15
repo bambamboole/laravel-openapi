@@ -40,13 +40,7 @@ class ListEndpoint extends Get
             ]),
             ...$this->makeNegativeResponses(),
         ];
-        $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
-        if (! empty($filters)) {
-            $parameters[] = AttributeFactory::createFilterParameter($filters);
-        }
-        if (! empty($includes)) {
-            $parameters[] = AttributeFactory::createIncludeParameter($includes);
-        }
+        $parameters = $this->makeParameters($parameters, $path, $filters, $includes);
         $parameters = array_merge($parameters, AttributeFactory::createPaginationParameters($defaultPageSize, $maxPageSize, $paginationType));
 
         parent::__construct([
