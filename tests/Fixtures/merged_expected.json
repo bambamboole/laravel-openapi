@@ -354,6 +354,14 @@
                 "operationId": "GET::api-v1-test-models-id",
                 "parameters": [
                     {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "name": "include",
                         "in": "query",
                         "required": false,
@@ -366,14 +374,6 @@
                                 ],
                                 "type": "string"
                             }
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
                         }
                     }
                 ],

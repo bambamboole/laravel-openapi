@@ -5,7 +5,10 @@ namespace Bambamboole\LaravelOpenApi\Attributes;
 use Bambamboole\LaravelOpenApi\AttributeFactory;
 use Illuminate\Support\Arr;
 use OpenApi\Attributes\JsonContent;
+use OpenApi\Attributes\MediaType;
+use OpenApi\Attributes\RequestBody;
 use OpenApi\Attributes\Response;
+use OpenApi\Attributes\Schema;
 use OpenApi\Generator;
 
 trait HasEndpointHelpers
@@ -45,11 +48,32 @@ trait HasEndpointHelpers
         ]);
     }
 
+    protected function makeParameters(array $parameters, string $path, array $filters = [], array $includes = []): array
+    {
+        $parameters = array_merge($parameters, AttributeFactory::createMissingPathParameters($path, $parameters));
+        if (! empty($filters)) {
+            $parameters[] = AttributeFactory::createFilterParameter($filters);
+        }
+        if (! empty($includes)) {
+            $parameters[] = AttributeFactory::createIncludeParameter($includes);
+        }
+
+        return $parameters;
+    }
+
+    protected function makeRequestBody(?string $request = null, string $contentType = 'application/json'): ?RequestBody
+    {
+        return $request
+            ? new RequestBody(content: new MediaType($contentType, schema: new Schema(ref: $request)))
+            : null;
+    }
+
     protected function compileX(
         bool $isInternal,
         ?\DateTimeInterface $deprecated,
         \BackedEnum|string|null $featureFlag,
         string|array|null $scopes = null,
+        ?string $request = null,
     ): string|array {
         $x = [];
         if ($isInternal) {
@@ -66,6 +90,9 @@ trait HasEndpointHelpers
         }
         if ($scopes) {
             $x['scopes'] = Arr::wrap($scopes);
+        }
+        if ($request) {
+            $x['request'] = $request;
         }
 
         return empty($x) ? Generator::UNDEFINED : $x;

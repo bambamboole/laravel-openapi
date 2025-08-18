@@ -119,6 +119,12 @@ paths:
       operationId: 'GET::api-v1-test-models-id'
       parameters:
         -
+          name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        -
           name: include
           in: query
           required: false
@@ -129,12 +135,6 @@ paths:
               type: string
               enum:
                 - 'test resource'
-        -
-          name: id
-          in: path
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: 'get test resource'
